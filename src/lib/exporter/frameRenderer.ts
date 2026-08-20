@@ -70,6 +70,7 @@ import {
 	parseCssGradient,
 	resolveLinearGradientAngle,
 } from "./gradientParser";
+import { renderKeyboardOverlay } from "./keyboardOverlayRenderer";
 import { createThreeDPass, type ThreeDPass } from "./threeDPass";
 import { drawWebcamFrameImage } from "./webcamFrameDrawing";
 
@@ -108,6 +109,9 @@ interface FrameRenderConfig {
 	cursorTelemetry?: import("@/components/video-editor/types").CursorTelemetryPoint[];
 	cursorClickTimestamps?: number[];
 	platform: string;
+	showKeyboardOverlay?: boolean;
+	showSingleKeyPresses?: boolean;
+	keyboardOverlaySize?: number;
 }
 
 interface AnimationState {
@@ -519,6 +523,22 @@ export class FrameRenderer {
 		} else if (this.compositeCtx && this.foregroundCanvas) {
 			// Flat path or 3D-without-shadow: stamp foreground directly
 			this.compositeCtx.drawImage(this.foregroundCanvas, 0, 0);
+		}
+
+		if (
+			this.config.showKeyboardOverlay &&
+			this.config.cursorRecordingData?.keyboardEvents.length &&
+			this.compositeCtx
+		) {
+			renderKeyboardOverlay(this.compositeCtx, {
+				events: this.config.cursorRecordingData.keyboardEvents,
+				timeMs,
+				showSingleKeys: this.config.showSingleKeyPresses ?? false,
+				size: this.config.keyboardOverlaySize ?? 1,
+				platform: this.config.platform,
+				width: this.config.width,
+				height: this.config.height,
+			});
 		}
 	}
 

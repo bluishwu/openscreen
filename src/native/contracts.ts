@@ -34,6 +34,16 @@ export interface CursorRecordingSample extends CursorTelemetryPoint {
 	interactionType?: "move" | "click" | "mouseup";
 }
 
+export type KeyboardModifier = "control" | "alt" | "shift" | "meta";
+
+/** A non-modifier key press captured while the recording was active. */
+export interface KeyboardRecordingEvent {
+	timeMs: number;
+	/** DOM-style physical key code (for example `KeyK`, `Enter`, or `ArrowLeft`). */
+	code: string;
+	modifiers: KeyboardModifier[];
+}
+
 export interface NativeCursorAsset {
 	id: string;
 	platform: NativePlatform;
@@ -51,6 +61,7 @@ export interface CursorRecordingData {
 	provider: CursorProviderKind;
 	samples: CursorRecordingSample[];
 	assets: NativeCursorAsset[];
+	keyboardEvents: KeyboardRecordingEvent[];
 }
 
 export interface CursorCapabilities {

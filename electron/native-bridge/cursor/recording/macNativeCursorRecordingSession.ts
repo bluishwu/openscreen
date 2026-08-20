@@ -3,9 +3,12 @@ import { accessSync, constants as fsConstants } from "node:fs";
 import path from "node:path";
 import type { Readable } from "node:stream";
 import { type Rectangle, screen, systemPreferences } from "electron";
+import { keyboardCodeFromMacKeyCode } from "../../../../src/lib/keyboardEvents";
 import type {
 	CursorRecordingData,
 	CursorRecordingSample,
+	KeyboardModifier,
+	KeyboardRecordingEvent,
 	NativeCursorAsset,
 	NativeCursorType,
 } from "../../../../src/native/contracts";
@@ -44,6 +47,15 @@ type MacCursorEvent =
 			leftButtonDown?: boolean;
 			leftButtonPressed?: boolean;
 			leftButtonReleased?: boolean;
+	  }
+	| {
+			type: "key";
+			timestampMs: number;
+			keyCode: number;
+			control?: boolean;
+			alt?: boolean;
+			shift?: boolean;
+			meta?: boolean;
 	  };
 
 const HELPER_NAME = "openscreen-macos-cursor-helper";
@@ -193,6 +205,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 	private readyTimer: NodeJS.Timeout | null = null;
 	private previousLeftButtonDown = false;
 	private consecutiveOutsideSamples = 0;
+	private keyboardEvents: KeyboardRecordingEvent[] = [];
 	// Hide only after this many consecutive out-of-bounds samples (~100ms at 33ms interval).
 	// Fast swipes that briefly exit the display are clipped by clip-path instead of disappearing.
 	private static readonly OUTSIDE_HIDE_THRESHOLD = 3;
@@ -206,6 +219,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 		this.startTimeMs = this.options.startTimeMs ?? Date.now();
 		this.previousLeftButtonDown = false;
 		this.consecutiveOutsideSamples = 0;
+		this.keyboardEvents = [];
 
 		try {
 			systemPreferences.isTrustedAccessibilityClient(true);
@@ -282,6 +296,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 			provider: this.assets.size > 0 ? "native" : "none",
 			samples: this.samples,
 			assets: [...this.assets.values()],
+			keyboardEvents: this.keyboardEvents,
 		};
 	}
 
@@ -351,6 +366,23 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 				payload.leftButtonPressed === true,
 				payload.leftButtonReleased === true,
 			);
+			return;
+		}
+
+		if (payload.type === "key") {
+			const code = keyboardCodeFromMacKeyCode(payload.keyCode);
+			if (!code) return;
+			const modifiers: KeyboardModifier[] = [];
+			if (payload.control) modifiers.push("control");
+			if (payload.alt) modifiers.push("alt");
+			if (payload.shift) modifiers.push("shift");
+			if (payload.meta) modifiers.push("meta");
+			this.keyboardEvents.push({
+				timeMs: Math.max(0, payload.timestampMs - this.startTimeMs),
+				code,
+				modifiers,
+			});
+			if (this.keyboardEvents.length > this.options.maxSamples) this.keyboardEvents.shift();
 		}
 	}
 

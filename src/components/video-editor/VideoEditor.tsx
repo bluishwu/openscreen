@@ -209,6 +209,9 @@ export default function VideoEditor() {
 		webcamReactiveZoom,
 		webcamSizePreset,
 		webcamPosition,
+		showKeyboardOverlay,
+		showSingleKeyPresses,
+		keyboardOverlaySize,
 	} = editorState;
 
 	// Non-undoable state
@@ -420,6 +423,9 @@ export default function VideoEditor() {
 				webcamReactiveZoom: normalizedEditor.webcamReactiveZoom,
 				webcamSizePreset: normalizedEditor.webcamSizePreset,
 				webcamPosition: normalizedEditor.webcamPosition,
+				showKeyboardOverlay: normalizedEditor.showKeyboardOverlay,
+				showSingleKeyPresses: normalizedEditor.showSingleKeyPresses,
+				keyboardOverlaySize: normalizedEditor.keyboardOverlaySize,
 			});
 			setExportQuality(normalizedEditor.exportQuality);
 			setExportFormat(normalizedEditor.exportFormat);
@@ -497,6 +503,9 @@ export default function VideoEditor() {
 			webcamReactiveZoom,
 			webcamSizePreset,
 			webcamPosition,
+			showKeyboardOverlay,
+			showSingleKeyPresses,
+			keyboardOverlaySize,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -528,6 +537,9 @@ export default function VideoEditor() {
 		webcamReactiveZoom,
 		webcamSizePreset,
 		webcamPosition,
+		showKeyboardOverlay,
+		showSingleKeyPresses,
+		keyboardOverlaySize,
 		exportQuality,
 		exportFormat,
 		gifFrameRate,
@@ -656,6 +668,9 @@ export default function VideoEditor() {
 				webcamReactiveZoom,
 				webcamSizePreset,
 				webcamPosition,
+				showKeyboardOverlay,
+				showSingleKeyPresses,
+				keyboardOverlaySize,
 				exportQuality,
 				exportFormat,
 				gifFrameRate,
@@ -721,6 +736,9 @@ export default function VideoEditor() {
 			webcamReactiveZoom,
 			webcamSizePreset,
 			webcamPosition,
+			showKeyboardOverlay,
+			showSingleKeyPresses,
+			keyboardOverlaySize,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -1919,6 +1937,9 @@ export default function VideoEditor() {
 						previewHeight,
 						cursorTelemetry,
 						cursorClickTimestamps,
+						showKeyboardOverlay,
+						showSingleKeyPresses,
+						keyboardOverlaySize,
 						onProgress: (progress: ExportProgress) => {
 							setExportProgress(progress);
 						},
@@ -2013,6 +2034,9 @@ export default function VideoEditor() {
 						previewHeight,
 						cursorTelemetry,
 						cursorClickTimestamps,
+						showKeyboardOverlay,
+						showSingleKeyPresses,
+						keyboardOverlaySize,
 						onProgress: (progress: ExportProgress) => {
 							setExportProgress(progress);
 						},
@@ -2116,6 +2140,9 @@ export default function VideoEditor() {
 			handleExportSaved,
 			cursorTelemetry,
 			cursorClickTimestamps,
+			showKeyboardOverlay,
+			showSingleKeyPresses,
+			keyboardOverlaySize,
 			effectiveShowCursor,
 			cursorSize,
 			cursorSmoothing,
@@ -2643,6 +2670,10 @@ export default function VideoEditor() {
 													cursorClickBounce={cursorClickBounce}
 													cursorClipToBounds={cursorClipToBounds}
 													cursorTheme={cursorTheme}
+													showKeyboardOverlay={showKeyboardOverlay}
+													showSingleKeyPresses={showSingleKeyPresses}
+													keyboardOverlaySize={keyboardOverlaySize}
+													platform={nativePlatform ?? "linux"}
 													isPreviewingZoom={isPreviewingZoom}
 												/>
 											</div>
@@ -2837,6 +2868,18 @@ export default function VideoEditor() {
 											hasNativeCursorRecordingData(cursorRecordingData)
 										}
 										showCursorSettings={showCursorSettings}
+										hasKeyboardData={(cursorRecordingData?.keyboardEvents.length ?? 0) > 0}
+										showKeyboardOverlay={showKeyboardOverlay}
+										onShowKeyboardOverlayChange={(show) => pushState({ showKeyboardOverlay: show })}
+										showSingleKeyPresses={showSingleKeyPresses}
+										onShowSingleKeyPressesChange={(show) =>
+											pushState({ showSingleKeyPresses: show })
+										}
+										keyboardOverlaySize={keyboardOverlaySize}
+										onKeyboardOverlaySizeChange={(size) =>
+											updateState({ keyboardOverlaySize: size })
+										}
+										onKeyboardOverlaySizeCommit={commitState}
 									/>
 								</div>
 							</div>

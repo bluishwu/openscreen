@@ -19,11 +19,20 @@
 // Global mouse-hook state
 // ─────────────────────────────────────────────────────────────────────────────
 static HHOOK              g_mouseHook    = nullptr;
+static HHOOK              g_keyboardHook = nullptr;
 static DWORD              g_mainThreadId = 0;
 static std::atomic<int>   g_leftDownCount{0};
 static std::atomic<int>   g_leftUpCount{0};
 static std::atomic<bool>  g_stop{false};
 static std::mutex         g_stdoutMtx;
+static bool               g_keysDown[256] = {};
+static bool               g_controlDown = false;
+static bool               g_altDown = false;
+static bool               g_shiftDown = false;
+static bool               g_metaDown = false;
+
+static int64_t nowMs();
+static void writeJsonLine(const std::string& json);
 
 static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode >= 0) {
@@ -31,6 +40,56 @@ static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lPara
         else if (wParam == WM_LBUTTONUP)   g_leftUpCount.fetch_add(1,   std::memory_order_relaxed);
     }
     return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
+}
+
+static bool isModifierKey(DWORD virtualKey) {
+    return virtualKey == VK_CONTROL || virtualKey == VK_LCONTROL || virtualKey == VK_RCONTROL ||
+           virtualKey == VK_MENU || virtualKey == VK_LMENU || virtualKey == VK_RMENU ||
+           virtualKey == VK_SHIFT || virtualKey == VK_LSHIFT || virtualKey == VK_RSHIFT ||
+           virtualKey == VK_LWIN || virtualKey == VK_RWIN;
+}
+
+static void updateModifierState(DWORD virtualKey, bool down) {
+    if (virtualKey == VK_CONTROL || virtualKey == VK_LCONTROL || virtualKey == VK_RCONTROL)
+        g_controlDown = down;
+    else if (virtualKey == VK_MENU || virtualKey == VK_LMENU || virtualKey == VK_RMENU)
+        g_altDown = down;
+    else if (virtualKey == VK_SHIFT || virtualKey == VK_LSHIFT || virtualKey == VK_RSHIFT)
+        g_shiftDown = down;
+    else if (virtualKey == VK_LWIN || virtualKey == VK_RWIN)
+        g_metaDown = down;
+}
+
+static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    if (nCode >= 0 && lParam) {
+        const auto* event = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+        const bool isDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
+        const bool isUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
+        const DWORD virtualKey = event->vkCode;
+
+        if ((isDown || isUp) && virtualKey < 256) {
+            const bool wasDown = g_keysDown[virtualKey];
+            g_keysDown[virtualKey] = isDown;
+            if (isModifierKey(virtualKey)) {
+                updateModifierState(virtualKey, isDown);
+            } else if (isDown && !wasDown) {
+                char buf[256];
+                std::snprintf(
+                    buf,
+                    sizeof(buf),
+                    "{\"type\":\"key\",\"timestampMs\":%" PRId64
+                    ",\"virtualKey\":%lu,\"control\":%s,\"alt\":%s,\"shift\":%s,\"meta\":%s}",
+                    nowMs(),
+                    static_cast<unsigned long>(virtualKey),
+                    g_controlDown ? "true" : "false",
+                    (g_altDown || (event->flags & LLKHF_ALTDOWN) != 0) ? "true" : "false",
+                    g_shiftDown ? "true" : "false",
+                    g_metaDown ? "true" : "false");
+                writeJsonLine(buf);
+            }
+        }
+    }
+    return CallNextHookEx(g_keyboardHook, nCode, wParam, lParam);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -452,6 +511,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // The keyboard hook shares the cursor helper's lifetime. It emits only
+    // non-modifier key-down events plus modifier flags; key-up events and repeats
+    // are used for state tracking but are never persisted.
+    g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandle(nullptr), 0);
+    if (!g_keyboardHook) {
+        std::cerr << "SetWindowsHookEx(WH_KEYBOARD_LL) failed; shortcut capture disabled" << std::endl;
+    }
+
     // Prime GetAsyncKeyState so the first poll doesn't return stale "since-last-call" bits
     GetAsyncKeyState(VK_LBUTTON);
 
@@ -476,6 +543,7 @@ int main(int argc, char* argv[]) {
 
     g_stop.store(true, std::memory_order_relaxed);
     if (sampler.joinable()) sampler.join();
+    if (g_keyboardHook) UnhookWindowsHookEx(g_keyboardHook);
     UnhookWindowsHookEx(g_mouseHook);
     Gdiplus::GdiplusShutdown(gdipToken);
     return 0;

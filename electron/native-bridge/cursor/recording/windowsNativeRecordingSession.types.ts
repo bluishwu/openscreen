@@ -32,6 +32,16 @@ export interface WindowsCursorErrorEvent {
 	message: string;
 }
 
+export interface WindowsKeyboardEvent {
+	type: "key";
+	timestampMs: number;
+	virtualKey: number;
+	control: boolean;
+	alt: boolean;
+	shift: boolean;
+	meta: boolean;
+}
+
 export interface WindowsCursorAssetPayload {
 	id: string;
 	imageDataUrl: string;
@@ -45,7 +55,8 @@ export interface WindowsCursorAssetPayload {
 export type WindowsCursorEvent =
 	| WindowsCursorSampleEvent
 	| WindowsCursorReadyEvent
-	| WindowsCursorErrorEvent;
+	| WindowsCursorErrorEvent
+	| WindowsKeyboardEvent;
 
 export interface WindowsNativeRecordingSessionOptions {
 	getDisplayBounds: () => Rectangle | null;

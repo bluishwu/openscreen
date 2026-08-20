@@ -212,6 +212,12 @@
 	"language": {
 		"title": "Ngôn ngữ"
 	},
+	"keyboard": {
+		"title": "Bàn phím",
+		"show": "Hiện phím tắt",
+		"singleKeys": "Hiện phím đơn",
+		"size": "Kích thước nhãn"
+	},
 	"timeline": {
 		"title": "Dòng thời gian",
 		"waveform": "Hiển thị dạng sóng âm thanh trên rãnh cắt"

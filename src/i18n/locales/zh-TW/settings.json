@@ -213,6 +213,12 @@
 	"language": {
 		"title": "語言"
 	},
+	"keyboard": {
+		"title": "鍵盤",
+		"show": "顯示快捷鍵",
+		"singleKeys": "顯示單鍵按下",
+		"size": "標籤大小"
+	},
 	"timeline": {
 		"title": "時間軸",
 		"waveform": "在剪輯軌道上顯示音訊波形"

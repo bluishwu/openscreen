@@ -78,6 +78,12 @@ export const DEFAULT_CURSOR_SETTINGS: CursorVisualSettings & { show: boolean; th
 	theme: DEFAULT_CURSOR_THEME_ID,
 };
 
+export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
+	show: true,
+	showSingleKeys: false,
+	size: 1,
+} as const;
+
 export const DEFAULT_EXPORT_SETTINGS: {
 	quality: ExportQuality;
 	format: ExportFormat;

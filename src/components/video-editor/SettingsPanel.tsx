@@ -8,6 +8,7 @@ import {
 	Film,
 	Image,
 	Info,
+	Keyboard,
 	LayoutPanelTop,
 	Lock,
 	MousePointerClick,
@@ -348,6 +349,14 @@ interface SettingsPanelProps {
 	onCursorThemeChange?: (theme: string) => void;
 	hasCursorData?: boolean;
 	showCursorSettings?: boolean;
+	hasKeyboardData?: boolean;
+	showKeyboardOverlay?: boolean;
+	onShowKeyboardOverlayChange?: (show: boolean) => void;
+	showSingleKeyPresses?: boolean;
+	onShowSingleKeyPressesChange?: (show: boolean) => void;
+	keyboardOverlaySize?: number;
+	onKeyboardOverlaySizeChange?: (size: number) => void;
+	onKeyboardOverlaySizeCommit?: () => void;
 }
 
 export default SettingsPanel;
@@ -361,7 +370,14 @@ const ZOOM_DEPTH_OPTIONS: Array<{ depth: ZoomDepth; label: string }> = [
 	{ depth: 6, label: "5×" },
 ];
 
-type SettingsPanelMode = "background" | "effects" | "layout" | "cursor" | "export" | "timeline";
+type SettingsPanelMode =
+	| "background"
+	| "effects"
+	| "layout"
+	| "cursor"
+	| "keyboard"
+	| "export"
+	| "timeline";
 
 const MP4_EXPORT_SHORT_SIDES = {
 	medium: 720,
@@ -484,6 +500,14 @@ export function SettingsPanel({
 	onCursorThemeChange,
 	hasCursorData = false,
 	showCursorSettings = true,
+	hasKeyboardData = false,
+	showKeyboardOverlay = true,
+	onShowKeyboardOverlayChange,
+	showSingleKeyPresses = false,
+	onShowSingleKeyPressesChange,
+	keyboardOverlaySize = 1,
+	onKeyboardOverlaySizeChange,
+	onKeyboardOverlaySizeCommit,
 }: SettingsPanelProps) {
 	const t = useScopedT("settings");
 	const [activePanelMode, setActivePanelMode] = useState<SettingsPanelMode>("background");
@@ -657,6 +681,15 @@ export function SettingsPanel({
 						id: "cursor" as const,
 						label: t("effects.title"),
 						icon: MousePointerClick,
+					},
+				]
+			: []),
+		...(hasKeyboardData
+			? [
+					{
+						id: "keyboard" as const,
+						label: t("keyboard.title"),
+						icon: Keyboard,
 					},
 				]
 			: []),
@@ -1691,6 +1724,64 @@ export function SettingsPanel({
 												)}
 											</div>
 										)}
+									</AccordionContent>
+								</AccordionItem>
+							)}
+
+							{activePanelMode === "keyboard" && hasKeyboardData && (
+								<AccordionItem value="keyboard" className="editor-panel-section px-3">
+									<AccordionTrigger className="py-2.5 hover:no-underline">
+										<div className="flex items-center gap-2">
+											<Keyboard className="w-4 h-4 text-[#34B27B]" />
+											<span className="text-xs font-medium">{t("keyboard.title")}</span>
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="pb-3">
+										<div className="p-2 rounded-lg editor-control-surface space-y-3">
+											<div className="flex items-center justify-between">
+												<div className="text-[10px] font-medium text-slate-300">
+													{t("keyboard.show")}
+												</div>
+												<Switch
+													checked={showKeyboardOverlay}
+													onCheckedChange={onShowKeyboardOverlayChange}
+													className="data-[state=checked]:bg-[#34B27B] scale-90"
+												/>
+											</div>
+											{showKeyboardOverlay && (
+												<>
+													<div className="flex items-center justify-between">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.singleKeys")}
+														</div>
+														<Switch
+															checked={showSingleKeyPresses}
+															onCheckedChange={onShowSingleKeyPressesChange}
+															className="data-[state=checked]:bg-[#34B27B] scale-90"
+														/>
+													</div>
+													<div className="p-2 rounded-lg bg-white/5 border border-white/5">
+														<div className="flex items-center justify-between mb-1">
+															<div className="text-[10px] font-medium text-slate-300">
+																{t("keyboard.size")}
+															</div>
+															<span className="text-[10px] text-slate-500 font-mono">
+																{Math.round(keyboardOverlaySize * 100)}%
+															</span>
+														</div>
+														<Slider
+															value={[keyboardOverlaySize]}
+															onValueChange={(values) => onKeyboardOverlaySizeChange?.(values[0])}
+															onValueCommit={() => onKeyboardOverlaySizeCommit?.()}
+															min={0.6}
+															max={1.6}
+															step={0.05}
+															className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+														/>
+													</div>
+												</>
+											)}
+										</div>
 									</AccordionContent>
 								</AccordionItem>
 							)}

@@ -221,6 +221,12 @@
 	"language": {
 		"title": "언어"
 	},
+	"keyboard": {
+		"title": "키보드",
+		"show": "단축키 표시",
+		"singleKeys": "단일 키 입력 표시",
+		"size": "레이블 크기"
+	},
 	"timeline": {
 		"title": "타임라인",
 		"waveform": "트림 트랙에 오디오 파형 표시"

@@ -221,6 +221,12 @@
 	"language": {
 		"title": "Idioma"
 	},
+	"keyboard": {
+		"title": "Teclado",
+		"show": "Mostrar atajos",
+		"singleKeys": "Mostrar pulsaciones individuales",
+		"size": "Tamaño de etiqueta"
+	},
 	"timeline": {
 		"title": "Línea de tiempo",
 		"waveform": "Mostrar forma de onda en pista de recorte"

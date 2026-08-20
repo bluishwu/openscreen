@@ -49,6 +49,9 @@ export interface EditorState {
 	webcamReactiveZoom: boolean;
 	webcamSizePreset: WebcamSizePreset;
 	webcamPosition: WebcamPosition | null;
+	showKeyboardOverlay: boolean;
+	showSingleKeyPresses: boolean;
+	keyboardOverlaySize: number;
 }
 
 export const INITIAL_EDITOR_STATE: EditorState = {
@@ -73,6 +76,9 @@ export const INITIAL_EDITOR_STATE: EditorState = {
 	webcamReactiveZoom: DEFAULT_WEBCAM_REACTIVE_ZOOM,
 	webcamSizePreset: DEFAULT_WEBCAM_SETTINGS.sizePreset,
 	webcamPosition: DEFAULT_WEBCAM_SETTINGS.position,
+	showKeyboardOverlay: true,
+	showSingleKeyPresses: false,
+	keyboardOverlaySize: 1,
 };
 
 type StateUpdate = Partial<EditorState> | ((prev: EditorState) => Partial<EditorState>);

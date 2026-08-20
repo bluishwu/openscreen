@@ -21,18 +21,30 @@ final class MouseButtonTracker {
 	private let lock = NSLock()
 	private var leftDownCount = 0
 	private var leftUpCount = 0
+	private var keyboardEvents: [KeyboardEvent] = []
 	private var eventTap: CFMachPort?
 	private var runLoopSource: CFRunLoopSource?
 
 	struct Events {
 		let leftDownCount: Int
 		let leftUpCount: Int
+		let keyboardEvents: [KeyboardEvent]
+	}
+
+	struct KeyboardEvent {
+		let timestampMs: Int
+		let keyCode: Int64
+		let control: Bool
+		let alt: Bool
+		let shift: Bool
+		let meta: Bool
 	}
 
 	func start() -> Bool {
 		let mask =
 			(1 << CGEventType.leftMouseDown.rawValue) |
-			(1 << CGEventType.leftMouseUp.rawValue)
+			(1 << CGEventType.leftMouseUp.rawValue) |
+			(1 << CGEventType.keyDown.rawValue)
 		guard let tap = CGEvent.tapCreate(
 			tap: .cgSessionEventTap,
 			place: .headInsertEventTap,
@@ -41,7 +53,7 @@ final class MouseButtonTracker {
 			callback: { _, type, event, userInfo in
 				if let userInfo {
 					let tracker = Unmanaged<MouseButtonTracker>.fromOpaque(userInfo).takeUnretainedValue()
-					tracker.record(type)
+					tracker.record(type, event)
 				}
 				return Unmanaged.passUnretained(event)
 			},
@@ -68,13 +80,18 @@ final class MouseButtonTracker {
 	func consume() -> Events {
 		lock.lock()
 		defer { lock.unlock() }
-		let events = Events(leftDownCount: leftDownCount, leftUpCount: leftUpCount)
+		let events = Events(
+			leftDownCount: leftDownCount,
+			leftUpCount: leftUpCount,
+			keyboardEvents: keyboardEvents
+		)
 		leftDownCount = 0
 		leftUpCount = 0
+		keyboardEvents.removeAll(keepingCapacity: true)
 		return events
 	}
 
-	private func record(_ type: CGEventType) {
+	private func record(_ type: CGEventType, _ event: CGEvent) {
 		lock.lock()
 		defer { lock.unlock() }
 		if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
@@ -85,6 +102,16 @@ final class MouseButtonTracker {
 			leftDownCount += 1
 		} else if type == .leftMouseUp {
 			leftUpCount += 1
+		} else if type == .keyDown && event.getIntegerValueField(.keyboardEventAutorepeat) == 0 {
+			let flags = event.flags
+			keyboardEvents.append(KeyboardEvent(
+				timestampMs: Int(Date().timeIntervalSince1970 * 1000),
+				keyCode: event.getIntegerValueField(.keyboardEventKeycode),
+				control: flags.contains(.maskControl),
+				alt: flags.contains(.maskAlternate),
+				shift: flags.contains(.maskShift),
+				meta: flags.contains(.maskCommand)
+			))
 		}
 	}
 
@@ -347,6 +374,17 @@ while true {
 			"leftButtonPressed": mouseEvents.leftDownCount > 0,
 			"leftButtonReleased": mouseEvents.leftUpCount > 0,
 		])
+		for keyEvent in mouseEvents.keyboardEvents {
+			emit([
+				"type": "key",
+				"timestampMs": keyEvent.timestampMs,
+				"keyCode": keyEvent.keyCode,
+				"control": keyEvent.control,
+				"alt": keyEvent.alt,
+				"shift": keyEvent.shift,
+				"meta": keyEvent.meta,
+			])
+		}
 		Thread.sleep(forTimeInterval: Double(intervalMs) / 1000.0)
 	}
 }

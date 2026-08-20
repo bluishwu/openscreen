@@ -223,6 +223,12 @@
 	"language": {
 		"title": "Language"
 	},
+	"keyboard": {
+		"title": "Keyboard",
+		"show": "Show shortcuts",
+		"singleKeys": "Show single key presses",
+		"size": "Label size"
+	},
 	"timeline": {
 		"title": "Timeline",
 		"waveform": "Show Audio Waveform on Trim Track"

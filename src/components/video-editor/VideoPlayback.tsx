@@ -53,6 +53,7 @@ import {
 	DEFAULT_EDITOR_LAYOUT_SETTINGS,
 	DEFAULT_SOURCE_DIMENSIONS,
 } from "./editorDefaults";
+import { KeyboardOverlay } from "./KeyboardOverlay";
 import {
 	type AnnotationRegion,
 	type BlurData,
@@ -145,6 +146,10 @@ interface VideoPlaybackProps {
 	cursorClickBounce?: number;
 	cursorClipToBounds?: boolean;
 	cursorTheme?: string;
+	showKeyboardOverlay?: boolean;
+	showSingleKeyPresses?: boolean;
+	keyboardOverlaySize?: number;
+	platform?: string;
 	// Render the selected zoom at the playhead even while paused, so the editor can
 	// preview the effect without leaving the focus-edit view.
 	isPreviewingZoom?: boolean;
@@ -272,6 +277,10 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			cursorClickBounce = DEFAULT_CURSOR_SETTINGS.clickBounce,
 			cursorClipToBounds = DEFAULT_CURSOR_SETTINGS.clipToBounds,
 			cursorTheme = DEFAULT_CURSOR_SETTINGS.theme,
+			showKeyboardOverlay = true,
+			showSingleKeyPresses = false,
+			keyboardOverlaySize = 1,
+			platform = "linux",
 			isPreviewingZoom = false,
 		},
 		ref,
@@ -2108,6 +2117,16 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 						</div>
 					)}
 				</div>
+				<KeyboardOverlay
+					events={cursorRecordingData?.keyboardEvents ?? []}
+					timeMs={Math.round(currentTime * 1000)}
+					show={showKeyboardOverlay}
+					showSingleKeys={showSingleKeyPresses}
+					size={keyboardOverlaySize}
+					platform={platform}
+					canvasWidth={overlaySize.width}
+					canvasHeight={overlaySize.height}
+				/>
 				{/* Native cursor clip. Lives outside composite3DRef (preserve-3d) so clip-path
 				    keeps working during 3D zoom rotations; bounds are set dynamically. */}
 				<div

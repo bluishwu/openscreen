@@ -221,6 +221,12 @@
 	"language": {
 		"title": "Langue"
 	},
+	"keyboard": {
+		"title": "Clavier",
+		"show": "Afficher les raccourcis",
+		"singleKeys": "Afficher les touches seules",
+		"size": "Taille des étiquettes"
+	},
 	"timeline": {
 		"title": "Montage",
 		"waveform": "Afficher la forme d'onde sur la piste de découpe"

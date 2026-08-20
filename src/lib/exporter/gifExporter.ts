@@ -62,6 +62,9 @@ interface GifExporterConfig {
 	previewHeight?: number;
 	cursorTelemetry?: import("@/components/video-editor/types").CursorTelemetryPoint[];
 	cursorClickTimestamps?: number[];
+	showKeyboardOverlay?: boolean;
+	showSingleKeyPresses?: boolean;
+	keyboardOverlaySize?: number;
 	onProgress?: (progress: ExportProgress) => void;
 }
 
@@ -180,6 +183,9 @@ export class GifExporter {
 				previewHeight: this.config.previewHeight,
 				cursorTelemetry: this.config.cursorTelemetry,
 				cursorClickTimestamps: this.config.cursorClickTimestamps,
+				showKeyboardOverlay: this.config.showKeyboardOverlay,
+				showSingleKeyPresses: this.config.showSingleKeyPresses,
+				keyboardOverlaySize: this.config.keyboardOverlaySize,
 				platform,
 			});
 			await this.renderer.initialize();

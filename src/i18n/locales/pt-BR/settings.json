@@ -204,6 +204,12 @@
 		"clipToBounds": "Recortar à tela",
 		"clipToBoundsDescription": "Mantém o cursor dentro do quadro do vídeo. Desative para permitir que o cursor ultrapasse as bordas — útil ao aplicar zoom ou ao deslocar."
 	},
+	"keyboard": {
+		"title": "Teclado",
+		"show": "Mostrar atalhos",
+		"singleKeys": "Mostrar teclas individuais",
+		"size": "Tamanho dos rótulos"
+	},
 	"language": {
 		"title": "Idioma"
 	}

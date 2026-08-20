@@ -76,6 +76,22 @@ describe("projectPersistence media compatibility", () => {
 		expect(normalizeProjectEditor({ webcamMirrored: "yes" as never }).webcamMirrored).toBe(false);
 	});
 
+	it("normalizes keyboard overlay settings with backwards-compatible defaults", () => {
+		const defaults = normalizeProjectEditor({});
+		expect(defaults.showKeyboardOverlay).toBe(true);
+		expect(defaults.showSingleKeyPresses).toBe(false);
+		expect(defaults.keyboardOverlaySize).toBe(1);
+
+		const customized = normalizeProjectEditor({
+			showKeyboardOverlay: false,
+			showSingleKeyPresses: true,
+			keyboardOverlaySize: 99,
+		});
+		expect(customized.showKeyboardOverlay).toBe(false);
+		expect(customized.showSingleKeyPresses).toBe(true);
+		expect(customized.keyboardOverlaySize).toBe(1.6);
+	});
+
 	it("normalizes blur region type and mosaic block size safely", () => {
 		const editor = normalizeProjectEditor({
 			annotationRegions: [

@@ -16,6 +16,7 @@ import {
 	shell,
 	systemPreferences,
 } from "electron";
+import { normalizeKeyboardRecordingEvent } from "../../src/lib/keyboardEvents";
 import type { NativeMacRecordingRequest } from "../../src/lib/nativeMacRecording";
 import type { NativeWindowsRecordingRequest } from "../../src/lib/nativeWindowsRecording";
 import {
@@ -31,6 +32,7 @@ import {
 import type {
 	CursorRecordingData,
 	CursorRecordingSample,
+	KeyboardRecordingEvent,
 	NativeCursorAsset,
 	ProjectFileResult,
 	ProjectPathResult,
@@ -500,6 +502,7 @@ async function readCursorRecordingFile(targetVideoPath: string): Promise<CursorR
 				? parsed.samples
 				: [];
 		const rawAssets = Array.isArray(parsed?.assets) ? parsed.assets : [];
+		const rawKeyboardEvents = Array.isArray(parsed?.keyboardEvents) ? parsed.keyboardEvents : [];
 
 		const samples = rawSamples
 			.map((sample: unknown) => normalizeCursorSample(sample))
@@ -511,6 +514,12 @@ async function readCursorRecordingFile(targetVideoPath: string): Promise<CursorR
 		const assets = rawAssets
 			.map((asset: unknown) => normalizeCursorAsset(asset))
 			.filter((asset: NativeCursorAsset | null): asset is NativeCursorAsset => Boolean(asset));
+		const keyboardEvents = rawKeyboardEvents
+			.map((event: unknown) => normalizeKeyboardRecordingEvent(event))
+			.filter((event: KeyboardRecordingEvent | null): event is KeyboardRecordingEvent =>
+				Boolean(event),
+			)
+			.sort((a: KeyboardRecordingEvent, b: KeyboardRecordingEvent) => a.timeMs - b.timeMs);
 
 		return {
 			version:
@@ -518,6 +527,7 @@ async function readCursorRecordingFile(targetVideoPath: string): Promise<CursorR
 			provider: parsed?.provider === "native" ? "native" : "none",
 			samples,
 			assets,
+			keyboardEvents,
 		};
 	} catch (error) {
 		const nodeError = error as NodeJS.ErrnoException;
@@ -527,6 +537,7 @@ async function readCursorRecordingFile(targetVideoPath: string): Promise<CursorR
 				provider: "none",
 				samples: [],
 				assets: [],
+				keyboardEvents: [],
 			};
 		}
 
@@ -823,7 +834,11 @@ async function stopCursorRecording() {
 
 async function writePendingCursorTelemetry(videoPath: string) {
 	const telemetryPath = `${videoPath}.cursor.json`;
-	if (pendingCursorRecordingData && pendingCursorRecordingData.samples.length > 0) {
+	if (
+		pendingCursorRecordingData &&
+		(pendingCursorRecordingData.samples.length > 0 ||
+			pendingCursorRecordingData.keyboardEvents.length > 0)
+	) {
 		await fs.writeFile(telemetryPath, JSON.stringify(pendingCursorRecordingData, null, 2), "utf-8");
 	}
 	pendingCursorRecordingData = null;
@@ -842,6 +857,22 @@ function shiftPendingCursorTelemetry(offsetMs: number) {
 				timeMs: Math.max(0, sample.timeMs - offsetMs),
 			}))
 			.sort((a, b) => a.timeMs - b.timeMs),
+		keyboardEvents: pendingCursorRecordingData.keyboardEvents
+			.map((event) => ({
+				...event,
+				timeMs: Math.max(0, event.timeMs - offsetMs),
+			}))
+			.sort((a, b) => a.timeMs - b.timeMs),
+	};
+}
+
+function retainPendingKeyboardEventsOnly() {
+	if (!pendingCursorRecordingData) return;
+	pendingCursorRecordingData = {
+		...pendingCursorRecordingData,
+		provider: "none",
+		samples: [],
+		assets: [],
 	};
 }
 
@@ -885,6 +916,17 @@ function compactPendingCursorTelemetryPauseRanges(
 				};
 			})
 			.filter((sample): sample is CursorRecordingSample => Boolean(sample))
+			.sort((a, b) => a.timeMs - b.timeMs),
+		keyboardEvents: pendingCursorRecordingData.keyboardEvents
+			.map((event) => {
+				let pausedBeforeEventMs = 0;
+				for (const range of normalizedRanges) {
+					if (event.timeMs >= range.startMs && event.timeMs <= range.endMs) return null;
+					if (event.timeMs > range.endMs) pausedBeforeEventMs += range.endMs - range.startMs;
+				}
+				return { ...event, timeMs: Math.max(0, event.timeMs - pausedBeforeEventMs) };
+			})
+			.filter((event): event is KeyboardRecordingEvent => Boolean(event))
 			.sort((a, b) => a.timeMs - b.timeMs),
 	};
 }
@@ -1659,16 +1701,12 @@ export function registerIpcHandlers(
 				nativeWindowsIsPaused = false;
 
 				const cursorStartTimeMs = Date.now();
-				if (cursorCaptureMode === "editable-overlay") {
-					nativeWindowsCursorRecordingStartMs = cursorStartTimeMs;
-					await startCursorRecording(cursorStartTimeMs);
-					console.info("[native-wgc] cursor sampler ready", {
-						cursorStartTimeMs,
-						warmupMs: Date.now() - cursorStartTimeMs,
-					});
-				} else {
-					pendingCursorRecordingData = null;
-				}
+				nativeWindowsCursorRecordingStartMs = cursorStartTimeMs;
+				await startCursorRecording(cursorStartTimeMs);
+				console.info("[native-wgc] input sampler ready", {
+					cursorStartTimeMs,
+					warmupMs: Date.now() - cursorStartTimeMs,
+				});
 
 				const proc = spawn(helperPath, [JSON.stringify(config)], {
 					cwd: RECORDINGS_DIR,
@@ -1679,10 +1717,7 @@ export function registerIpcHandlers(
 
 				await waitForNativeWindowsCaptureStart(proc);
 				const captureStartedAtMs = Date.now();
-				nativeWindowsCursorOffsetMs =
-					cursorCaptureMode === "editable-overlay"
-						? Math.max(0, captureStartedAtMs - cursorStartTimeMs)
-						: 0;
+				nativeWindowsCursorOffsetMs = Math.max(0, captureStartedAtMs - cursorStartTimeMs);
 				const webcamFormat = readNativeWindowsWebcamFormat(nativeWindowsCaptureOutput);
 				console.info("[native-wgc] capture started", {
 					captureStartedAtMs,
@@ -1814,12 +1849,8 @@ export function registerIpcHandlers(
 			nativeMacIsPaused = false;
 
 			const cursorStartTimeMs = Date.now();
-			if (cursorCaptureMode === "editable-overlay") {
-				nativeMacCursorRecordingStartMs = cursorStartTimeMs;
-				await startCursorRecording(cursorStartTimeMs);
-			} else {
-				pendingCursorRecordingData = null;
-			}
+			nativeMacCursorRecordingStartMs = cursorStartTimeMs;
+			await startCursorRecording(cursorStartTimeMs);
 
 			const proc = spawn(helperPath, [JSON.stringify(config)], {
 				cwd: RECORDINGS_DIR,
@@ -1830,10 +1861,7 @@ export function registerIpcHandlers(
 
 			await waitForNativeMacCaptureStart(proc);
 			const captureStartedAtMs = Date.now();
-			nativeMacCursorOffsetMs =
-				cursorCaptureMode === "editable-overlay"
-					? Math.max(0, captureStartedAtMs - cursorStartTimeMs)
-					: 0;
+			nativeMacCursorOffsetMs = Math.max(0, captureStartedAtMs - cursorStartTimeMs);
 
 			const source = selectedSource || { name: "Screen" };
 			if (onRecordingStateChange) {
@@ -1980,11 +2008,7 @@ export function registerIpcHandlers(
 				throw new Error("Native Windows capture did not return an output path.");
 			}
 
-			if (cursorCaptureMode === "editable-overlay") {
-				await stopCursorRecording();
-			} else {
-				pendingCursorRecordingData = null;
-			}
+			await stopCursorRecording();
 			if (discard) {
 				pendingCursorRecordingData = null;
 				await Promise.all([
@@ -1995,11 +2019,10 @@ export function registerIpcHandlers(
 				return { success: true, discarded: true };
 			}
 
-			if (cursorCaptureMode === "editable-overlay") {
-				compactPendingCursorTelemetryPauseRanges(nativeWindowsPauseRanges);
-				shiftPendingCursorTelemetry(nativeWindowsCursorOffsetMs);
-				await writePendingCursorTelemetry(screenVideoPath);
-			}
+			compactPendingCursorTelemetryPauseRanges(nativeWindowsPauseRanges);
+			shiftPendingCursorTelemetry(nativeWindowsCursorOffsetMs);
+			if (cursorCaptureMode !== "editable-overlay") retainPendingKeyboardEventsOnly();
+			await writePendingCursorTelemetry(screenVideoPath);
 			let webcamVideoPath: string | undefined;
 			if (preferredWebcamPath) {
 				try {
@@ -2073,11 +2096,7 @@ export function registerIpcHandlers(
 				throw new Error("Native macOS capture did not return an output path.");
 			}
 
-			if (cursorCaptureMode === "editable-overlay") {
-				await stopCursorRecording();
-			} else {
-				pendingCursorRecordingData = null;
-			}
+			await stopCursorRecording();
 			if (discard) {
 				pendingCursorRecordingData = null;
 				await Promise.all([
@@ -2087,11 +2106,10 @@ export function registerIpcHandlers(
 				return { success: true, discarded: true };
 			}
 
-			if (cursorCaptureMode === "editable-overlay") {
-				compactPendingCursorTelemetryPauseRanges(nativeMacPauseRanges);
-				shiftPendingCursorTelemetry(nativeMacCursorOffsetMs);
-				await writePendingCursorTelemetry(screenVideoPath);
-			}
+			compactPendingCursorTelemetryPauseRanges(nativeMacPauseRanges);
+			shiftPendingCursorTelemetry(nativeMacCursorOffsetMs);
+			if (cursorCaptureMode !== "editable-overlay") retainPendingKeyboardEventsOnly();
+			await writePendingCursorTelemetry(screenVideoPath);
 
 			const session: RecordingSession = {
 				screenVideoPath,
@@ -2264,6 +2282,7 @@ export function registerIpcHandlers(
 		setCurrentRecordingSessionState(session);
 		currentProjectPath = null;
 
+		if (cursorCaptureMode === "system") retainPendingKeyboardEventsOnly();
 		await writePendingCursorTelemetry(screenVideoPath);
 
 		const sessionManifestPath = path.join(
@@ -2324,12 +2343,13 @@ export function registerIpcHandlers(
 	ipcMain.handle(
 		"set-recording-state",
 		async (_, recording: boolean, recordingId?: number, cursorCaptureMode?: CursorCaptureMode) => {
-			const normalizedCursorCaptureMode =
-				normalizeCursorCaptureMode(cursorCaptureMode) ?? "editable-overlay";
-			if (recording && normalizedCursorCaptureMode === "editable-overlay") {
+			if (recording) {
 				await startCursorRecording(recordingId);
 			} else {
 				await stopCursorRecording();
+				if (normalizeCursorCaptureMode(cursorCaptureMode) === "system") {
+					retainPendingKeyboardEventsOnly();
+				}
 			}
 
 			const source = selectedSource || { name: "Screen" };

@@ -212,6 +212,12 @@
 	"language": {
 		"title": "语言"
 	},
+	"keyboard": {
+		"title": "键盘",
+		"show": "显示快捷键",
+		"singleKeys": "显示单键按下",
+		"size": "标签大小"
+	},
 	"timeline": {
 		"title": "时间轴",
 		"waveform": "在剪辑轨道上显示音频波形"

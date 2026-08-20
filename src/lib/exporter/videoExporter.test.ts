@@ -101,6 +101,22 @@ describe("isSourceCopyFastPathEligible", () => {
 							},
 						],
 						samples: [{ timeMs: 0, cx: 0.5, cy: 0.5, visible: true, assetId: "cursor" }],
+						keyboardEvents: [],
+					},
+				}),
+				videoInfo,
+			),
+		).toBe(false);
+		expect(
+			isSourceCopyFastPathEligible(
+				createConfig({
+					showKeyboardOverlay: true,
+					cursorRecordingData: {
+						version: 2,
+						provider: "none",
+						assets: [],
+						samples: [],
+						keyboardEvents: [{ timeMs: 100, code: "KeyK", modifiers: ["control"] }],
 					},
 				}),
 				videoInfo,

@@ -53,6 +53,9 @@ export interface VideoExporterConfig extends ExportConfig {
 	previewHeight?: number;
 	cursorTelemetry?: import("@/components/video-editor/types").CursorTelemetryPoint[];
 	cursorClickTimestamps?: number[];
+	showKeyboardOverlay?: boolean;
+	showSingleKeyPresses?: boolean;
+	keyboardOverlaySize?: number;
 	onProgress?: (progress: ExportProgress) => void;
 }
 
@@ -110,6 +113,14 @@ export function getSourceCopyFastPathBlockers(
 	if (hasActiveTimeRegions(config.annotationRegions))
 		blockers.push("annotation regions are present");
 	if (hasNativeCursorOverlay(config)) blockers.push("editable cursor overlay is enabled");
+	if (
+		config.showKeyboardOverlay &&
+		config.cursorRecordingData?.keyboardEvents.some(
+			(event) => config.showSingleKeyPresses || event.modifiers.length > 0,
+		)
+	) {
+		blockers.push("keyboard overlay is enabled");
+	}
 	if (!isDefaultCrop(config.cropRegion)) blockers.push("crop is not default");
 	if ((config.padding ?? 0) > SOURCE_COPY_EPSILON) blockers.push("padding is not zero");
 	if ((config.videoPadding ?? 0) > SOURCE_COPY_EPSILON) blockers.push("video padding is not zero");
@@ -262,6 +273,9 @@ export class VideoExporter {
 				previewHeight: this.config.previewHeight,
 				cursorTelemetry: this.config.cursorTelemetry,
 				cursorClickTimestamps: this.config.cursorClickTimestamps,
+				showKeyboardOverlay: this.config.showKeyboardOverlay,
+				showSingleKeyPresses: this.config.showSingleKeyPresses,
+				keyboardOverlaySize: this.config.keyboardOverlaySize,
 				platform,
 			});
 			this.renderer = renderer;

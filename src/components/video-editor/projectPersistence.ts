@@ -11,6 +11,7 @@ import {
 	DEFAULT_EDITOR_LAYOUT_SETTINGS,
 	DEFAULT_EXPORT_SETTINGS,
 	DEFAULT_GIF_SETTINGS,
+	DEFAULT_KEYBOARD_OVERLAY_SETTINGS,
 	DEFAULT_WEBCAM_SETTINGS,
 } from "./editorDefaults";
 import {
@@ -92,6 +93,9 @@ export interface ProjectEditorState {
 	gifLoop: boolean;
 	gifSizePreset: GifSizePreset;
 	cursorTheme: string;
+	showKeyboardOverlay: boolean;
+	showSingleKeyPresses: boolean;
+	keyboardOverlaySize: number;
 }
 
 export interface EditorProjectData {
@@ -447,6 +451,17 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 
 	return {
 		cursorTheme: normalizeCursorThemeId(editor.cursorTheme),
+		showKeyboardOverlay:
+			typeof editor.showKeyboardOverlay === "boolean"
+				? editor.showKeyboardOverlay
+				: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.show,
+		showSingleKeyPresses:
+			typeof editor.showSingleKeyPresses === "boolean"
+				? editor.showSingleKeyPresses
+				: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.showSingleKeys,
+		keyboardOverlaySize: isFiniteNumber(editor.keyboardOverlaySize)
+			? clamp(editor.keyboardOverlaySize, 0.6, 1.6)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.size,
 		wallpaper:
 			typeof editor.wallpaper === "string"
 				? normalizeWallpaperValue(editor.wallpaper)

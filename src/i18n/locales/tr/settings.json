@@ -212,6 +212,12 @@
 	"language": {
 		"title": "Dil"
 	},
+	"keyboard": {
+		"title": "Klavye",
+		"show": "Kısayolları göster",
+		"singleKeys": "Tek tuşları göster",
+		"size": "Etiket boyutu"
+	},
 	"timeline": {
 		"title": "Zaman Tüneli",
 		"waveform": "Kırpma Parçasında Ses Dalgasını Göster"

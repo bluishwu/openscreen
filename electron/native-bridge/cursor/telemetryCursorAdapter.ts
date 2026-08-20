@@ -28,6 +28,7 @@ export class TelemetryCursorAdapter implements CursorNativeAdapter {
 				provider: this.kind,
 				samples: [],
 				assets: [],
+				keyboardEvents: [],
 			};
 		}
 

@@ -40,6 +40,7 @@ export class TelemetryRecordingSession implements CursorRecordingSession {
 			provider: "none",
 			samples: this.samples,
 			assets: [],
+			keyboardEvents: [],
 		};
 	}
 

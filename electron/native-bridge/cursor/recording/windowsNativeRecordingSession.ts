@@ -3,10 +3,13 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
 import { app, screen } from "electron";
+import { keyboardCodeFromWindowsVirtualKey } from "../../../../src/lib/keyboardEvents";
 import { parseWindowHandleFromSourceId } from "../../../../src/lib/nativeWindowsRecording";
 import type {
 	CursorRecordingData,
 	CursorRecordingSample,
+	KeyboardModifier,
+	KeyboardRecordingEvent,
 	NativeCursorAsset,
 } from "../../../../src/native/contracts";
 import type { CursorRecordingSession } from "./session";
@@ -59,6 +62,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 	private sampleCount = 0;
 	private outOfBoundsSampleCount = 0;
 	private previousLeftButtonDown = false;
+	private keyboardEvents: KeyboardRecordingEvent[] = [];
 
 	constructor(private readonly options: WindowsNativeRecordingSessionOptions) {}
 
@@ -70,6 +74,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		this.sampleCount = 0;
 		this.outOfBoundsSampleCount = 0;
 		this.previousLeftButtonDown = false;
+		this.keyboardEvents = [];
 
 		const helperPath = findCursorSamplerPath();
 		if (!helperPath) {
@@ -148,6 +153,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 			provider: this.assets.size > 0 ? "native" : "none",
 			samples: this.samples,
 			assets: [...this.assets.values()],
+			keyboardEvents: this.keyboardEvents,
 		};
 	}
 
@@ -182,6 +188,23 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		if (payload.type === "ready") {
 			this.logDiagnostic("ready", { timestampMs: payload.timestampMs });
 			this.resolveReady();
+			return;
+		}
+
+		if (payload.type === "key") {
+			const code = keyboardCodeFromWindowsVirtualKey(payload.virtualKey);
+			if (!code) return;
+			const modifiers: KeyboardModifier[] = [];
+			if (payload.control) modifiers.push("control");
+			if (payload.alt) modifiers.push("alt");
+			if (payload.shift) modifiers.push("shift");
+			if (payload.meta) modifiers.push("meta");
+			this.keyboardEvents.push({
+				timeMs: Math.max(0, payload.timestampMs - this.startTimeMs),
+				code,
+				modifiers,
+			});
+			if (this.keyboardEvents.length > this.options.maxSamples) this.keyboardEvents.shift();
 			return;
 		}
 

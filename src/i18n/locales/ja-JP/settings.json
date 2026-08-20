@@ -221,6 +221,12 @@
 	"language": {
 		"title": "言語"
 	},
+	"keyboard": {
+		"title": "キーボード",
+		"show": "ショートカットを表示",
+		"singleKeys": "単一キーを表示",
+		"size": "ラベルサイズ"
+	},
 	"timeline": {
 		"title": "タイムライン",
 		"waveform": "トリムトラックにオーディオ波形を表示"
