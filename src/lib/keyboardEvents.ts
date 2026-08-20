@@ -14,7 +14,16 @@ export type KeyboardOverlayStyle =
 	| "terminal"
 	| "outline"
 	| "gradient";
-export type KeyboardOverlayAnimation = "none" | "fade" | "scale" | "slide" | "bounce";
+export type KeyboardOverlayAnimation =
+	| "none"
+	| "fade"
+	| "scale"
+	| "slide"
+	| "bounce"
+	| "drop"
+	| "rotate"
+	| "pulse"
+	| "blur";
 export type KeyboardOverlayPosition =
 	| "top-left"
 	| "top-center"
@@ -42,6 +51,10 @@ export const KEYBOARD_OVERLAY_ANIMATIONS: KeyboardOverlayAnimation[] = [
 	"scale",
 	"slide",
 	"bounce",
+	"drop",
+	"rotate",
+	"pulse",
+	"blur",
 ];
 
 export const KEYBOARD_OVERLAY_POSITIONS: KeyboardOverlayPosition[] = [
@@ -72,9 +85,18 @@ const WINDOWS_VK_TO_CODE: Record<number, string> = {
 	44: "PrintScreen",
 	45: "Insert",
 	46: "Delete",
+	16: "ShiftLeft",
+	17: "ControlLeft",
+	18: "AltLeft",
 	91: "MetaLeft",
 	92: "MetaRight",
 	93: "ContextMenu",
+	160: "ShiftLeft",
+	161: "ShiftRight",
+	162: "ControlLeft",
+	163: "ControlRight",
+	164: "AltLeft",
+	165: "AltRight",
 	106: "NumpadMultiply",
 	107: "NumpadAdd",
 	109: "NumpadSubtract",
@@ -148,6 +170,14 @@ const MAC_KEYCODE_TO_CODE: Record<number, string> = {
 	50: "Backquote",
 	51: "Backspace",
 	53: "Escape",
+	54: "MetaRight",
+	55: "MetaLeft",
+	56: "ShiftLeft",
+	58: "AltLeft",
+	59: "ControlLeft",
+	60: "ShiftRight",
+	61: "AltRight",
+	62: "ControlRight",
 	65: "NumpadDecimal",
 	67: "NumpadMultiply",
 	69: "NumpadAdd",
@@ -212,6 +242,14 @@ const FRIENDLY_CODE_LABELS: Record<string, string> = {
 	CapsLock: "Caps Lock",
 	PrintScreen: "Print Screen",
 	ContextMenu: "Menu",
+	ShiftLeft: "Shift",
+	ShiftRight: "Shift",
+	ControlLeft: "Ctrl",
+	ControlRight: "Ctrl",
+	AltLeft: "Alt",
+	AltRight: "Alt",
+	MetaLeft: "Win",
+	MetaRight: "Win",
 	Semicolon: ";",
 	Equal: "=",
 	Comma: ",",
@@ -279,8 +317,17 @@ export function keyboardEventLabels(
 	const order: KeyboardModifier[] = mac
 		? ["control", "alt", "shift", "meta"]
 		: ["control", "alt", "shift", "meta"];
+	const ownModifier: KeyboardModifier | null = event.code.startsWith("Shift")
+		? "shift"
+		: event.code.startsWith("Control")
+			? "control"
+			: event.code.startsWith("Alt")
+				? "alt"
+				: event.code.startsWith("Meta")
+					? "meta"
+					: null;
 	const labels = order
-		.filter((modifier) => event.modifiers.includes(modifier))
+		.filter((modifier) => event.modifiers.includes(modifier) && modifier !== ownModifier)
 		.map((modifier) => modifierLabels[modifier]);
 
 	let keyLabel = FRIENDLY_CODE_LABELS[event.code];
@@ -288,6 +335,7 @@ export function keyboardEventLabels(
 	if (!keyLabel && event.code.startsWith("Digit")) keyLabel = event.code.slice(5);
 	if (!keyLabel && event.code.startsWith("Numpad")) keyLabel = `Num ${event.code.slice(6)}`;
 	keyLabel ??= event.code;
+	if (ownModifier === "meta" && mac) keyLabel = "⌘";
 	return [...labels, keyLabel];
 }
 
@@ -301,6 +349,8 @@ export interface KeyboardOverlayMotion {
 	opacity: number;
 	scale: number;
 	translateY: number;
+	rotateDeg: number;
+	blur: number;
 }
 
 const KEYBOARD_OVERLAY_ENTER_MS = 260;
@@ -311,7 +361,7 @@ export function getKeyboardOverlayMotion(
 ): KeyboardOverlayMotion {
 	const linear = Math.max(0, Math.min(1, active.ageMs / KEYBOARD_OVERLAY_ENTER_MS));
 	const easeOut = 1 - (1 - linear) ** 3;
-	const base = { opacity: active.opacity, scale: 1, translateY: 0 };
+	const base = { opacity: active.opacity, scale: 1, translateY: 0, rotateDeg: 0, blur: 0 };
 
 	switch (animation) {
 		case "fade":
@@ -326,6 +376,27 @@ export function getKeyboardOverlayMotion(
 			const bounce = 1 + c3 * (linear - 1) ** 3 + c1 * (linear - 1) ** 2;
 			return { ...base, opacity: active.opacity * Math.min(1, linear * 2.5), scale: bounce };
 		}
+		case "drop":
+			return { ...base, opacity: active.opacity * easeOut, translateY: -(1 - easeOut) * 1.15 };
+		case "rotate":
+			return {
+				...base,
+				opacity: active.opacity * easeOut,
+				scale: 0.82 + easeOut * 0.18,
+				rotateDeg: -(1 - easeOut) * 14,
+			};
+		case "pulse":
+			return {
+				...base,
+				opacity: active.opacity * Math.min(1, linear * 3),
+				scale: 1 + Math.sin(linear * Math.PI) * 0.18,
+			};
+		case "blur":
+			return {
+				...base,
+				opacity: active.opacity * easeOut,
+				blur: (1 - easeOut) * 0.55,
+			};
 		default:
 			return base;
 	}

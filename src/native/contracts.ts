@@ -36,7 +36,7 @@ export interface CursorRecordingSample extends CursorTelemetryPoint {
 
 export type KeyboardModifier = "control" | "alt" | "shift" | "meta";
 
-/** A non-modifier key press captured while the recording was active. */
+/** A distinct key press, including standalone modifiers, captured while recording. */
 export interface KeyboardRecordingEvent {
 	timeMs: number;
 	/** DOM-style physical key code (for example `KeyK`, `Enter`, or `ArrowLeft`). */

@@ -44,7 +44,8 @@ final class MouseButtonTracker {
 		let mask =
 			(1 << CGEventType.leftMouseDown.rawValue) |
 			(1 << CGEventType.leftMouseUp.rawValue) |
-			(1 << CGEventType.keyDown.rawValue)
+			(1 << CGEventType.keyDown.rawValue) |
+			(1 << CGEventType.flagsChanged.rawValue)
 		guard let tap = CGEvent.tapCreate(
 			tap: .cgSessionEventTap,
 			place: .headInsertEventTap,
@@ -112,6 +113,27 @@ final class MouseButtonTracker {
 				shift: flags.contains(.maskShift),
 				meta: flags.contains(.maskCommand)
 			))
+		} else if type == .flagsChanged {
+			let flags = event.flags
+			let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+			let isPressed: Bool
+			switch keyCode {
+			case 56, 60: isPressed = flags.contains(.maskShift)
+			case 59, 62: isPressed = flags.contains(.maskControl)
+			case 58, 61: isPressed = flags.contains(.maskAlternate)
+			case 54, 55: isPressed = flags.contains(.maskCommand)
+			default: isPressed = false
+			}
+			if isPressed {
+				keyboardEvents.append(KeyboardEvent(
+					timestampMs: Int(Date().timeIntervalSince1970 * 1000),
+					keyCode: keyCode,
+					control: flags.contains(.maskControl),
+					alt: flags.contains(.maskAlternate),
+					shift: flags.contains(.maskShift),
+					meta: flags.contains(.maskCommand)
+				))
+			}
 		}
 	}
 

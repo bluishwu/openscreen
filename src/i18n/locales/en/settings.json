@@ -224,7 +224,7 @@
 		"title": "Language"
 	},
 	"keyboard": {
-		"title": "Keyboard",
+		"title": "Keyboard & input",
 		"show": "Show shortcuts",
 		"singleKeys": "Show single key presses",
 		"size": "Label size",
@@ -250,7 +250,33 @@
 			"fade": "Fade",
 			"scale": "Pop",
 			"slide": "Slide up",
-			"bounce": "Bounce"
+			"bounce": "Bounce",
+			"drop": "Drop in",
+			"rotate": "Twist",
+			"pulse": "Pulse",
+			"blur": "Focus"
+		},
+		"sounds": {
+			"title": "Input sounds",
+			"click": "Mouse click",
+			"keyboard": "Keyboard",
+			"volume": "Volume",
+			"clickStyles": {
+				"none": "Off",
+				"soft": "Soft tap",
+				"pop": "Pop",
+				"mechanical": "Mechanical",
+				"digital": "Digital",
+				"bubble": "Bubble"
+			},
+			"keyboardStyles": {
+				"none": "Off",
+				"soft": "Soft",
+				"mechanical": "Mechanical",
+				"typewriter": "Typewriter",
+				"digital": "Digital",
+				"thock": "Thock"
+			}
 		},
 		"positions": {
 			"top-left": "Top left",

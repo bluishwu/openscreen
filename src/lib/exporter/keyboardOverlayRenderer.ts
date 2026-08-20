@@ -136,8 +136,10 @@ export function renderKeyboardOverlay(
 	const centerX = panel.x + panelWidth / 2;
 	const centerY = panel.y + panelHeight / 2;
 	ctx.translate(centerX, centerY + motion.translateY * unit);
+	ctx.rotate((motion.rotateDeg * Math.PI) / 180);
 	ctx.scale(motion.scale, motion.scale);
 	ctx.translate(-centerX, -centerY);
+	ctx.filter = motion.blur > 0 ? `blur(${motion.blur * unit}px)` : "none";
 
 	if (!panelHidden) {
 		ctx.shadowColor = light ? "rgba(15,23,42,0.2)" : "rgba(0,0,0,0.34)";

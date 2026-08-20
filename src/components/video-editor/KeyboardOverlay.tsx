@@ -241,7 +241,8 @@ export function KeyboardOverlay({
 					boxShadow: theme.shadow,
 					backdropFilter: theme.blur,
 					opacity: motion.opacity,
-					transform: `translateY(${motion.translateY * unit}px) scale(${motion.scale})`,
+					transform: `translateY(${motion.translateY * unit}px) rotate(${motion.rotateDeg}deg) scale(${motion.scale})`,
+					filter: motion.blur > 0 ? `blur(${motion.blur * unit}px)` : undefined,
 					transformOrigin: position.startsWith("top") ? "top center" : "bottom center",
 				}}
 			>

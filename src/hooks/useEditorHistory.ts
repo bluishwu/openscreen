@@ -20,6 +20,7 @@ import {
 	DEFAULT_WEBCAM_MIRRORED,
 	DEFAULT_WEBCAM_REACTIVE_ZOOM,
 } from "@/components/video-editor/types";
+import type { ClickSoundStyle, KeyboardSoundStyle } from "@/lib/inputSoundEffects";
 import type {
 	KeyboardOverlayAnimation,
 	KeyboardOverlayPosition,
@@ -63,6 +64,9 @@ export interface EditorState {
 	keyboardOverlayOpacity: number;
 	keyboardOverlayOffset: number;
 	disabledKeyboardEventIds: string[];
+	clickSoundStyle: ClickSoundStyle;
+	keyboardSoundStyle: KeyboardSoundStyle;
+	inputSoundVolume: number;
 }
 
 export const INITIAL_EDITOR_STATE: EditorState = {
@@ -96,6 +100,9 @@ export const INITIAL_EDITOR_STATE: EditorState = {
 	keyboardOverlayOpacity: 0.86,
 	keyboardOverlayOffset: 0.055,
 	disabledKeyboardEventIds: [],
+	clickSoundStyle: "none",
+	keyboardSoundStyle: "none",
+	inputSoundVolume: 0.65,
 };
 
 type StateUpdate = Partial<EditorState> | ((prev: EditorState) => Partial<EditorState>);

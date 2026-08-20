@@ -53,6 +53,12 @@ import {
 	GIF_SIZE_PRESETS,
 } from "@/lib/exporter";
 import {
+	CLICK_SOUND_STYLES,
+	type ClickSoundStyle,
+	KEYBOARD_SOUND_STYLES,
+	type KeyboardSoundStyle,
+} from "@/lib/inputSoundEffects";
+import {
 	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
 	KEYBOARD_OVERLAY_STYLES,
@@ -376,6 +382,13 @@ interface SettingsPanelProps {
 	keyboardOverlayOffset?: number;
 	onKeyboardOverlayOffsetChange?: (offset: number) => void;
 	onKeyboardOverlayAppearanceCommit?: () => void;
+	clickSoundStyle?: ClickSoundStyle;
+	onClickSoundStyleChange?: (style: ClickSoundStyle) => void;
+	keyboardSoundStyle?: KeyboardSoundStyle;
+	onKeyboardSoundStyleChange?: (style: KeyboardSoundStyle) => void;
+	inputSoundVolume?: number;
+	onInputSoundVolumeChange?: (volume: number) => void;
+	onInputSoundVolumeCommit?: () => void;
 }
 
 export default SettingsPanel;
@@ -552,6 +565,13 @@ export function SettingsPanel({
 	keyboardOverlayOffset = 0.055,
 	onKeyboardOverlayOffsetChange,
 	onKeyboardOverlayAppearanceCommit,
+	clickSoundStyle = "none",
+	onClickSoundStyleChange,
+	keyboardSoundStyle = "none",
+	onKeyboardSoundStyleChange,
+	inputSoundVolume = 0.65,
+	onInputSoundVolumeChange,
+	onInputSoundVolumeCommit,
 }: SettingsPanelProps) {
 	const t = useScopedT("settings");
 	const [activePanelMode, setActivePanelMode] = useState<SettingsPanelMode>("background");
@@ -728,7 +748,7 @@ export function SettingsPanel({
 					},
 				]
 			: []),
-		...(hasKeyboardData
+		...(hasKeyboardData || hasCursorData
 			? [
 					{
 						id: "keyboard" as const,
@@ -1772,7 +1792,7 @@ export function SettingsPanel({
 								</AccordionItem>
 							)}
 
-							{activePanelMode === "keyboard" && hasKeyboardData && (
+							{activePanelMode === "keyboard" && (hasKeyboardData || hasCursorData) && (
 								<AccordionItem value="keyboard" className="editor-panel-section px-3">
 									<AccordionTrigger className="py-2.5 hover:no-underline">
 										<div className="flex items-center gap-2">
@@ -1832,6 +1852,73 @@ export function SettingsPanel({
 																	{t(`keyboard.styles.${style}`)}
 																</button>
 															))}
+														</div>
+													</div>
+													<div className="space-y-2 rounded-lg border border-white/[0.06] bg-black/20 p-2">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.sounds.title")}
+														</div>
+														<div className="grid grid-cols-2 gap-2">
+															<div className="space-y-1">
+																<div className="text-[9px] text-slate-500">
+																	{t("keyboard.sounds.click")}
+																</div>
+																<Select
+																	value={clickSoundStyle}
+																	onValueChange={(value) =>
+																		onClickSoundStyleChange?.(value as ClickSoundStyle)
+																	}
+																>
+																	<SelectTrigger className="h-8 border-white/[0.08] bg-white/[0.04] text-[9px]">
+																		<SelectValue />
+																	</SelectTrigger>
+																	<SelectContent>
+																		{CLICK_SOUND_STYLES.map((sound) => (
+																			<SelectItem key={sound} value={sound}>
+																				{t(`keyboard.sounds.clickStyles.${sound}`)}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+															</div>
+															<div className="space-y-1">
+																<div className="text-[9px] text-slate-500">
+																	{t("keyboard.sounds.keyboard")}
+																</div>
+																<Select
+																	value={keyboardSoundStyle}
+																	onValueChange={(value) =>
+																		onKeyboardSoundStyleChange?.(value as KeyboardSoundStyle)
+																	}
+																>
+																	<SelectTrigger className="h-8 border-white/[0.08] bg-white/[0.04] text-[9px]">
+																		<SelectValue />
+																	</SelectTrigger>
+																	<SelectContent>
+																		{KEYBOARD_SOUND_STYLES.map((sound) => (
+																			<SelectItem key={sound} value={sound}>
+																				{t(`keyboard.sounds.keyboardStyles.${sound}`)}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+															</div>
+														</div>
+														<div className="space-y-1">
+															<div className="flex items-center justify-between text-[9px] text-slate-500">
+																<span>{t("keyboard.sounds.volume")}</span>
+																<span className="font-mono">
+																	{Math.round(inputSoundVolume * 100)}%
+																</span>
+															</div>
+															<Slider
+																value={[inputSoundVolume]}
+																onValueChange={(values) => onInputSoundVolumeChange?.(values[0])}
+																onValueCommit={() => onInputSoundVolumeCommit?.()}
+																min={0}
+																max={1}
+																step={0.05}
+															/>
 														</div>
 													</div>
 													<div className="space-y-1.5">

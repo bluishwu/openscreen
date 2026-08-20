@@ -39,10 +39,16 @@ import {
 	resolveInterpolatedNativeCursorFrame,
 	resolveNativeCursorRenderAsset,
 } from "@/lib/cursor/nativeCursor";
-import type {
-	KeyboardOverlayAnimation,
-	KeyboardOverlayPosition,
-	KeyboardOverlayStyle,
+import {
+	type ClickSoundStyle,
+	type KeyboardSoundStyle,
+	playInputSound,
+} from "@/lib/inputSoundEffects";
+import {
+	type KeyboardOverlayAnimation,
+	type KeyboardOverlayPosition,
+	type KeyboardOverlayStyle,
+	keyboardRecordingEventId,
 } from "@/lib/keyboardEvents";
 import { classifyWallpaper, DEFAULT_WALLPAPER, resolveImageWallpaperUrl } from "@/lib/wallpaper";
 import { getCssClipPath } from "@/lib/webcamMaskShapes";
@@ -160,6 +166,9 @@ interface VideoPlaybackProps {
 	keyboardOverlayOpacity?: number;
 	keyboardOverlayOffset?: number;
 	disabledKeyboardEventIds?: string[];
+	clickSoundStyle?: ClickSoundStyle;
+	keyboardSoundStyle?: KeyboardSoundStyle;
+	inputSoundVolume?: number;
 	platform?: string;
 	// Render the selected zoom at the playhead even while paused, so the editor can
 	// preview the effect without leaving the focus-edit view.
@@ -297,6 +306,9 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			keyboardOverlayOpacity = 0.86,
 			keyboardOverlayOffset = 0.055,
 			disabledKeyboardEventIds = [],
+			clickSoundStyle = "none",
+			keyboardSoundStyle = "none",
+			inputSoundVolume = 0.65,
 			platform = "linux",
 			isPreviewingZoom = false,
 		},
@@ -331,6 +343,8 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		const zoomRegionsRef = useRef<ZoomRegion[]>([]);
 		const cursorTelemetryRef = useRef<CursorTelemetryPoint[]>([]);
 		const cursorClickTimestampsRef = useRef<number[]>([]);
+		const inputSoundContextRef = useRef<AudioContext | null>(null);
+		const lastInputSoundTimeMsRef = useRef(currentTime * 1000);
 		const selectedZoomIdRef = useRef<string | null>(null);
 		const animationStateRef = useRef({
 			scale: 1,
@@ -807,6 +821,56 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		useEffect(() => {
 			cursorClickTimestampsRef.current = cursorClickTimestamps;
 		}, [cursorClickTimestamps]);
+
+		useEffect(() => {
+			const currentTimeMs = currentTime * 1000;
+			const previousTimeMs = lastInputSoundTimeMsRef.current;
+			lastInputSoundTimeMsRef.current = currentTimeMs;
+			if (!isPlaying || currentTimeMs <= previousTimeMs || currentTimeMs - previousTimeMs > 500) {
+				return;
+			}
+			if (clickSoundStyle === "none" && keyboardSoundStyle === "none") return;
+
+			const context = inputSoundContextRef.current ?? new AudioContext();
+			inputSoundContextRef.current = context;
+			if (context.state === "suspended") void context.resume();
+			if (clickSoundStyle !== "none") {
+				for (const timestamp of cursorClickTimestamps) {
+					if (timestamp > previousTimeMs && timestamp <= currentTimeMs) {
+						playInputSound(context, "click", clickSoundStyle, inputSoundVolume);
+					}
+				}
+			}
+			if (keyboardSoundStyle !== "none") {
+				const disabled = new Set(disabledKeyboardEventIds);
+				(cursorRecordingData?.keyboardEvents ?? []).forEach((event, index) => {
+					if (
+						event.timeMs > previousTimeMs &&
+						event.timeMs <= currentTimeMs &&
+						!disabled.has(keyboardRecordingEventId(event, index))
+					) {
+						playInputSound(context, "keyboard", keyboardSoundStyle, inputSoundVolume);
+					}
+				});
+			}
+		}, [
+			clickSoundStyle,
+			currentTime,
+			cursorClickTimestamps,
+			cursorRecordingData,
+			disabledKeyboardEventIds,
+			inputSoundVolume,
+			isPlaying,
+			keyboardSoundStyle,
+		]);
+
+		useEffect(
+			() => () => {
+				void inputSoundContextRef.current?.close();
+				inputSoundContextRef.current = null;
+			},
+			[],
+		);
 
 		useEffect(() => {
 			selectedZoomIdRef.current = selectedZoomId;

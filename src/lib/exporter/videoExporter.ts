@@ -7,6 +7,11 @@ import type {
 	WebcamSizePreset,
 	ZoomRegion,
 } from "@/components/video-editor/types";
+import type {
+	ClickSoundStyle,
+	InputSoundEffectsConfig,
+	KeyboardSoundStyle,
+} from "@/lib/inputSoundEffects";
 import { keyboardRecordingEventId } from "@/lib/keyboardEvents";
 import { BackgroundLoadError } from "@/lib/wallpaper";
 import type { CursorRecordingData } from "@/native/contracts";
@@ -63,6 +68,9 @@ export interface VideoExporterConfig extends ExportConfig {
 	keyboardOverlayOpacity?: number;
 	keyboardOverlayOffset?: number;
 	disabledKeyboardEventIds?: string[];
+	clickSoundStyle?: ClickSoundStyle;
+	keyboardSoundStyle?: KeyboardSoundStyle;
+	inputSoundVolume?: number;
 	onProgress?: (progress: ExportProgress) => void;
 }
 
@@ -129,6 +137,12 @@ export function getSourceCopyFastPathBlockers(
 		)
 	) {
 		blockers.push("keyboard overlay is enabled");
+	}
+	if (
+		(config.clickSoundStyle ?? "none") !== "none" ||
+		(config.keyboardSoundStyle ?? "none") !== "none"
+	) {
+		blockers.push("input sound effects are enabled");
 	}
 	if (!isDefaultCrop(config.cropRegion)) blockers.push("crop is not default");
 	if ((config.padding ?? 0) > SOURCE_COPY_EPSILON) blockers.push("padding is not zero");
@@ -299,11 +313,24 @@ export class VideoExporter {
 			await this.initializeEncoder(encoderPreference);
 
 			const sourceDemuxer = streamingDecoder.getDemuxer();
+			const soundEffects: InputSoundEffectsConfig = {
+				clickTimestamps: this.config.cursorClickTimestamps ?? [],
+				keyboardEvents: this.config.cursorRecordingData?.keyboardEvents ?? [],
+				clickStyle: this.config.clickSoundStyle ?? "none",
+				keyboardStyle: this.config.keyboardSoundStyle ?? "none",
+				volume: this.config.inputSoundVolume ?? 0.65,
+				disabledKeyboardEventIds: this.config.disabledKeyboardEventIds,
+			};
+			const hasInputSounds =
+				(soundEffects.clickStyle !== "none" && soundEffects.clickTimestamps.length > 0) ||
+				(soundEffects.keyboardStyle !== "none" && soundEffects.keyboardEvents.length > 0);
 			const audioExportCodec =
 				videoInfo.hasAudio && sourceDemuxer
 					? await AudioProcessor.selectSupportedExportCodecForSource(sourceDemuxer)
-					: null;
-			if (videoInfo.hasAudio && !audioExportCodec) {
+					: hasInputSounds
+						? await AudioProcessor.selectSupportedExportCodec(48_000, 2)
+						: null;
+			if ((videoInfo.hasAudio || hasInputSounds) && !audioExportCodec) {
 				console.warn("[VideoExporter] No supported audio export codec, exporting video-only.");
 			}
 
@@ -494,7 +521,7 @@ export class VideoExporter {
 
 			if (hasAudio && audioExportCodec && !this.cancelled) {
 				const demuxer = streamingDecoder.getDemuxer();
-				if (demuxer) {
+				if (videoInfo.hasAudio && demuxer) {
 					console.log("[VideoExporter] Processing audio track...");
 					this.audioProcessor = new AudioProcessor();
 					await this.audioProcessor.process(
@@ -505,6 +532,17 @@ export class VideoExporter {
 						this.config.speedRegions,
 						videoInfo.duration,
 						audioExportCodec,
+						soundEffects,
+					);
+				} else if (hasInputSounds) {
+					this.audioProcessor = new AudioProcessor();
+					await this.audioProcessor.processSoundEffectsOnly(
+						muxer,
+						this.config.trimRegions,
+						this.config.speedRegions,
+						videoInfo.duration,
+						audioExportCodec,
+						soundEffects,
 					);
 				}
 			}

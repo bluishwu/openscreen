@@ -87,6 +87,9 @@ describe("projectPersistence media compatibility", () => {
 		expect(defaults.keyboardOverlayOpacity).toBe(0.86);
 		expect(defaults.keyboardOverlayOffset).toBe(0.055);
 		expect(defaults.disabledKeyboardEventIds).toEqual([]);
+		expect(defaults.clickSoundStyle).toBe("none");
+		expect(defaults.keyboardSoundStyle).toBe("none");
+		expect(defaults.inputSoundVolume).toBe(0.65);
 
 		const customized = normalizeProjectEditor({
 			showKeyboardOverlay: false,
@@ -98,6 +101,9 @@ describe("projectPersistence media compatibility", () => {
 			keyboardOverlayOpacity: -1,
 			keyboardOverlayOffset: 99,
 			disabledKeyboardEventIds: ["event-1", "event-1", 42 as never],
+			clickSoundStyle: "bubble",
+			keyboardSoundStyle: "typewriter",
+			inputSoundVolume: 99,
 		});
 		expect(customized.showKeyboardOverlay).toBe(false);
 		expect(customized.showSingleKeyPresses).toBe(true);
@@ -108,6 +114,9 @@ describe("projectPersistence media compatibility", () => {
 		expect(customized.keyboardOverlayOpacity).toBe(0.25);
 		expect(customized.keyboardOverlayOffset).toBe(0.2);
 		expect(customized.disabledKeyboardEventIds).toEqual(["event-1"]);
+		expect(customized.clickSoundStyle).toBe("bubble");
+		expect(customized.keyboardSoundStyle).toBe("typewriter");
+		expect(customized.inputSoundVolume).toBe(1);
 	});
 
 	it("normalizes blur region type and mosaic block size safely", () => {

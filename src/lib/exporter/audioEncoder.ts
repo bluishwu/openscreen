@@ -1,5 +1,14 @@
 import { WebDemuxer } from "web-demuxer";
 import type { SpeedRegion, TrimRegion } from "@/components/video-editor/types";
+import {
+	buildInputSoundTimeline,
+	type InputSoundEffectsConfig,
+	type InputSoundTimelineEvent,
+	mapSourceTimeToOutputTime,
+	mixInputSoundsIntoPlanar,
+	playInputSound,
+} from "@/lib/inputSoundEffects";
+import { keyboardRecordingEventId } from "@/lib/keyboardEvents";
 import type { ExportAudioMuxerCodec, VideoMuxer } from "./muxer";
 
 const AUDIO_BITRATE = 128_000;
@@ -221,6 +230,7 @@ export class AudioProcessor {
 		speedRegions: SpeedRegion[] | undefined,
 		validatedDurationSec: number,
 		exportCodec: ExportAudioCodec,
+		soundEffects?: InputSoundEffectsConfig,
 	): Promise<void> {
 		const sortedTrims = trimRegions ? [...trimRegions].sort((a, b) => a.startMs - b.startMs) : [];
 		const sortedSpeedRegions = speedRegions
@@ -236,6 +246,7 @@ export class AudioProcessor {
 				sortedTrims,
 				sortedSpeedRegions,
 				validatedDurationSec,
+				soundEffects,
 			);
 			if (!this.cancelled && renderedAudioBlob.size > 0) {
 				await this.muxRenderedAudioBlob(renderedAudioBlob, muxer, exportCodec);
@@ -248,7 +259,14 @@ export class AudioProcessor {
 		// streamingDecoder.decodeAll's read window so both paths read the same distance past
 		// the validated duration boundary.
 		const readEndSec = validatedDurationSec + 0.5;
-		await this.processTrimOnlyAudio(demuxer, muxer, sortedTrims, readEndSec, exportCodec);
+		await this.processTrimOnlyAudio(
+			demuxer,
+			muxer,
+			sortedTrims,
+			readEndSec,
+			exportCodec,
+			soundEffects,
+		);
 	}
 
 	// Trim-only path, used for projects without speed regions.
@@ -258,6 +276,7 @@ export class AudioProcessor {
 		sortedTrims: TrimRegion[],
 		readEndSec?: number,
 		exportCodec?: ExportAudioCodec,
+		soundEffects?: InputSoundEffectsConfig,
 	): Promise<void> {
 		let audioConfig: AudioDecoderConfig;
 		try {
@@ -363,6 +382,9 @@ export class AudioProcessor {
 		}
 
 		encoder.configure(encodeConfig);
+		const soundTimeline = soundEffects
+			? buildInputSoundTimeline({ ...soundEffects, trimRegions: sortedTrims })
+			: [];
 
 		for (const audioData of decodedFrames) {
 			if (this.cancelled) {
@@ -374,12 +396,21 @@ export class AudioProcessor {
 			const trimOffsetMs = this.computeTrimOffset(timestampMs, sortedTrims);
 			const adjustedTimestampUs = audioData.timestamp - trimOffsetMs * 1000;
 
-			const adjusted = this.cloneForEncoding(
+			let adjusted = this.cloneForEncoding(
 				audioData,
 				Math.max(0, adjustedTimestampUs),
 				outputChannels,
 			);
 			audioData.close();
+			if (soundTimeline.length > 0 && soundEffects) {
+				const mixed = this.mixSoundEffectsIntoAudioData(
+					adjusted,
+					soundTimeline,
+					soundEffects.volume,
+				);
+				adjusted.close();
+				adjusted = mixed;
+			}
 
 			encoder.encode(adjusted);
 			adjusted.close();
@@ -408,6 +439,7 @@ export class AudioProcessor {
 		trimRegions: TrimRegion[],
 		speedRegions: SpeedRegion[],
 		validatedDurationSec: number,
+		soundEffects?: InputSoundEffectsConfig,
 	): Promise<Blob> {
 		const media = document.createElement("audio");
 		media.src = videoUrl;
@@ -431,6 +463,39 @@ export class AudioProcessor {
 		const sourceNode = audioContext.createMediaElementSource(media);
 		const destinationNode = audioContext.createMediaStreamDestination();
 		sourceNode.connect(destinationNode);
+		const sourceSoundEvents = soundEffects
+			? [
+					...(soundEffects.clickStyle === "none"
+						? []
+						: soundEffects.clickTimestamps.map((timeMs) => ({
+								timeMs,
+								kind: "click" as const,
+								style: soundEffects.clickStyle,
+							}))),
+					...(soundEffects.keyboardStyle === "none"
+						? []
+						: soundEffects.keyboardEvents
+								.filter(
+									(event, index) =>
+										!soundEffects.disabledKeyboardEventIds?.includes(
+											keyboardRecordingEventId(event, index),
+										),
+								)
+								.map((event) => ({
+									timeMs: event.timeMs,
+									kind: "keyboard" as const,
+									style: soundEffects.keyboardStyle,
+								}))),
+				]
+					.filter(
+						(event) =>
+							!trimRegions.some(
+								(trim) => event.timeMs >= trim.startMs && event.timeMs < trim.endMs,
+							),
+					)
+					.sort((a, b) => a.timeMs - b.timeMs)
+			: [];
+		let nextSoundEventIndex = 0;
 
 		let rafId: number | null = null;
 		let recorder: MediaRecorder | null = null;
@@ -458,6 +523,12 @@ export class AudioProcessor {
 			}
 
 			await this.seekTo(media, startPosition);
+			while (
+				nextSoundEventIndex < sourceSoundEvents.length &&
+				sourceSoundEvents[nextSoundEventIndex].timeMs < startPosition * 1000
+			) {
+				nextSoundEventIndex += 1;
+			}
 
 			// Set initial playback rate for the starting position.
 			const initialSpeedRegion = this.findActiveSpeedRegion(startPosition * 1000, speedRegions);
@@ -508,6 +579,20 @@ export class AudioProcessor {
 					}
 
 					const currentTimeMs = media.currentTime * 1000;
+					while (
+						nextSoundEventIndex < sourceSoundEvents.length &&
+						sourceSoundEvents[nextSoundEventIndex].timeMs <= currentTimeMs
+					) {
+						const soundEvent = sourceSoundEvents[nextSoundEventIndex];
+						playInputSound(
+							audioContext,
+							soundEvent.kind,
+							soundEvent.style,
+							soundEffects?.volume ?? 0.65,
+							destinationNode,
+						);
+						nextSoundEventIndex += 1;
+					}
 					const activeTrimRegion = this.findActiveTrimRegion(currentTimeMs, trimRegions);
 
 					if (activeTrimRegion && !media.paused && !media.ended) {
@@ -665,6 +750,78 @@ export class AudioProcessor {
 		return undefined;
 	}
 
+	async processSoundEffectsOnly(
+		muxer: VideoMuxer,
+		trimRegions: TrimRegion[] | undefined,
+		speedRegions: SpeedRegion[] | undefined,
+		validatedDurationSec: number,
+		exportCodec: ExportAudioCodec,
+		soundEffects: InputSoundEffectsConfig,
+	): Promise<void> {
+		const sortedTrims = [...(trimRegions ?? [])].sort((a, b) => a.startMs - b.startMs);
+		const sortedSpeeds = [...(speedRegions ?? [])].sort((a, b) => a.startMs - b.startMs);
+		const timeline = buildInputSoundTimeline({
+			...soundEffects,
+			trimRegions: sortedTrims,
+			speedRegions: sortedSpeeds,
+		});
+		if (timeline.length === 0) return;
+
+		const sampleRate = exportCodec.sampleRate;
+		const channels = exportCodec.numberOfChannels;
+		const encodedChunks: { chunk: EncodedAudioChunk; meta?: EncodedAudioChunkMetadata }[] = [];
+		const encoder = new AudioEncoder({
+			output: (chunk, meta) => encodedChunks.push({ chunk, meta }),
+			error: (error) => console.error("[AudioProcessor] Sound effect encode error:", error),
+		});
+		encoder.configure({
+			codec: exportCodec.encoderCodec,
+			sampleRate,
+			numberOfChannels: channels,
+			bitrate: AUDIO_BITRATE,
+		});
+
+		const outputDurationMs =
+			mapSourceTimeToOutputTime(validatedDurationSec * 1000, sortedTrims, sortedSpeeds) ?? 0;
+		const totalFrames = Math.max(1, Math.ceil((outputDurationMs / 1000) * sampleRate));
+		const blockFrames = 1024;
+		for (
+			let frameOffset = 0;
+			frameOffset < totalFrames && !this.cancelled;
+			frameOffset += blockFrames
+		) {
+			const frameCount = Math.min(blockFrames, totalFrames - frameOffset);
+			const planes = Array.from({ length: channels }, () => new Float32Array(frameCount));
+			mixInputSoundsIntoPlanar(
+				planes,
+				sampleRate,
+				(frameOffset / sampleRate) * 1000,
+				timeline,
+				soundEffects.volume,
+			);
+			const data = new Float32Array(frameCount * channels);
+			planes.forEach((plane, channel) => data.set(plane, channel * frameCount));
+			const audioData = new AudioData({
+				format: "f32-planar",
+				sampleRate,
+				numberOfFrames: frameCount,
+				numberOfChannels: channels,
+				timestamp: Math.round((frameOffset / sampleRate) * 1_000_000),
+				data,
+			});
+			encoder.encode(audioData);
+			audioData.close();
+		}
+		if (encoder.state === "configured") {
+			await encoder.flush();
+			encoder.close();
+		}
+		for (const { chunk, meta } of encodedChunks) {
+			if (this.cancelled) break;
+			await muxer.addAudioChunk(chunk, meta);
+		}
+	}
+
 	private waitForLoadedMetadata(media: HTMLMediaElement): Promise<void> {
 		if (Number.isFinite(media.duration) && media.readyState >= HTMLMediaElement.HAVE_METADATA) {
 			return Promise.resolve();
@@ -771,6 +928,31 @@ export class AudioProcessor {
 			numberOfChannels: src.numberOfChannels,
 			timestamp: newTimestamp,
 			data: buffer,
+		});
+	}
+
+	private mixSoundEffectsIntoAudioData(
+		src: AudioData,
+		events: InputSoundTimelineEvent[],
+		volume: number,
+	): AudioData {
+		const planes = Array.from(
+			{ length: src.numberOfChannels },
+			() => new Float32Array(src.numberOfFrames),
+		);
+		for (let channel = 0; channel < src.numberOfChannels; channel += 1) {
+			src.copyTo(planes[channel], { format: "f32-planar", planeIndex: channel });
+		}
+		mixInputSoundsIntoPlanar(planes, src.sampleRate, src.timestamp / 1000, events, volume);
+		const data = new Float32Array(src.numberOfFrames * src.numberOfChannels);
+		planes.forEach((plane, channel) => data.set(plane, channel * src.numberOfFrames));
+		return new AudioData({
+			format: "f32-planar",
+			sampleRate: src.sampleRate,
+			numberOfFrames: src.numberOfFrames,
+			numberOfChannels: src.numberOfChannels,
+			timestamp: src.timestamp,
+			data,
 		});
 	}
 

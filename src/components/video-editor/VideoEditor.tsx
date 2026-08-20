@@ -218,6 +218,9 @@ export default function VideoEditor() {
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
 		disabledKeyboardEventIds,
+		clickSoundStyle,
+		keyboardSoundStyle,
+		inputSoundVolume,
 	} = editorState;
 
 	// Non-undoable state
@@ -438,6 +441,9 @@ export default function VideoEditor() {
 				keyboardOverlayOpacity: normalizedEditor.keyboardOverlayOpacity,
 				keyboardOverlayOffset: normalizedEditor.keyboardOverlayOffset,
 				disabledKeyboardEventIds: normalizedEditor.disabledKeyboardEventIds,
+				clickSoundStyle: normalizedEditor.clickSoundStyle,
+				keyboardSoundStyle: normalizedEditor.keyboardSoundStyle,
+				inputSoundVolume: normalizedEditor.inputSoundVolume,
 			});
 			setExportQuality(normalizedEditor.exportQuality);
 			setExportFormat(normalizedEditor.exportFormat);
@@ -524,6 +530,9 @@ export default function VideoEditor() {
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
 			disabledKeyboardEventIds,
+			clickSoundStyle,
+			keyboardSoundStyle,
+			inputSoundVolume,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -564,6 +573,9 @@ export default function VideoEditor() {
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
 		disabledKeyboardEventIds,
+		clickSoundStyle,
+		keyboardSoundStyle,
+		inputSoundVolume,
 		exportQuality,
 		exportFormat,
 		gifFrameRate,
@@ -701,6 +713,9 @@ export default function VideoEditor() {
 				keyboardOverlayOpacity,
 				keyboardOverlayOffset,
 				disabledKeyboardEventIds,
+				clickSoundStyle,
+				keyboardSoundStyle,
+				inputSoundVolume,
 				exportQuality,
 				exportFormat,
 				gifFrameRate,
@@ -775,6 +790,9 @@ export default function VideoEditor() {
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
 			disabledKeyboardEventIds,
+			clickSoundStyle,
+			keyboardSoundStyle,
+			inputSoundVolume,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -2085,6 +2103,9 @@ export default function VideoEditor() {
 						keyboardOverlayOpacity,
 						keyboardOverlayOffset,
 						disabledKeyboardEventIds,
+						clickSoundStyle,
+						keyboardSoundStyle,
+						inputSoundVolume,
 						onProgress: (progress: ExportProgress) => {
 							setExportProgress(progress);
 						},
@@ -2197,6 +2218,9 @@ export default function VideoEditor() {
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
 			disabledKeyboardEventIds,
+			clickSoundStyle,
+			keyboardSoundStyle,
+			inputSoundVolume,
 			effectiveShowCursor,
 			cursorSize,
 			cursorSmoothing,
@@ -2733,6 +2757,9 @@ export default function VideoEditor() {
 													keyboardOverlayOpacity={keyboardOverlayOpacity}
 													keyboardOverlayOffset={keyboardOverlayOffset}
 													disabledKeyboardEventIds={disabledKeyboardEventIds}
+													clickSoundStyle={clickSoundStyle}
+													keyboardSoundStyle={keyboardSoundStyle}
+													inputSoundVolume={inputSoundVolume}
 													platform={nativePlatform ?? "linux"}
 													isPreviewingZoom={isPreviewingZoom}
 												/>
@@ -2961,6 +2988,13 @@ export default function VideoEditor() {
 											updateState({ keyboardOverlayOffset: offset })
 										}
 										onKeyboardOverlayAppearanceCommit={commitState}
+										clickSoundStyle={clickSoundStyle}
+										onClickSoundStyleChange={(style) => pushState({ clickSoundStyle: style })}
+										keyboardSoundStyle={keyboardSoundStyle}
+										onKeyboardSoundStyleChange={(style) => pushState({ keyboardSoundStyle: style })}
+										inputSoundVolume={inputSoundVolume}
+										onInputSoundVolumeChange={(volume) => updateState({ inputSoundVolume: volume })}
+										onInputSoundVolumeCommit={commitState}
 									/>
 								</div>
 							</div>

@@ -213,7 +213,7 @@
 		"title": "语言"
 	},
 	"keyboard": {
-		"title": "键盘",
+		"title": "键盘与输入",
 		"show": "显示快捷键",
 		"singleKeys": "显示单键按下",
 		"size": "标签大小",
@@ -239,7 +239,33 @@
 			"fade": "淡入",
 			"scale": "弹出",
 			"slide": "上滑",
-			"bounce": "弹跳"
+			"bounce": "弹跳",
+			"drop": "落入",
+			"rotate": "旋转",
+			"pulse": "脉冲",
+			"blur": "聚焦"
+		},
+		"sounds": {
+			"title": "输入音效",
+			"click": "鼠标点击",
+			"keyboard": "键盘",
+			"volume": "音量",
+			"clickStyles": {
+				"none": "关闭",
+				"soft": "轻触",
+				"pop": "气泡弹出",
+				"mechanical": "机械",
+				"digital": "数码",
+				"bubble": "水泡"
+			},
+			"keyboardStyles": {
+				"none": "关闭",
+				"soft": "轻柔",
+				"mechanical": "机械键盘",
+				"typewriter": "打字机",
+				"digital": "数码",
+				"thock": "深沉轴体"
+			}
 		},
 		"positions": {
 			"top-left": "左上",

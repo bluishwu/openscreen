@@ -3,6 +3,12 @@ import { normalizeBlurColor, normalizeBlurType } from "@/lib/blurEffects";
 import { normalizeCursorThemeId } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
 import {
+	CLICK_SOUND_STYLES,
+	type ClickSoundStyle,
+	KEYBOARD_SOUND_STYLES,
+	type KeyboardSoundStyle,
+} from "@/lib/inputSoundEffects";
+import {
 	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
 	KEYBOARD_OVERLAY_STYLES,
@@ -110,6 +116,9 @@ export interface ProjectEditorState {
 	keyboardOverlayOpacity: number;
 	keyboardOverlayOffset: number;
 	disabledKeyboardEventIds: string[];
+	clickSoundStyle: ClickSoundStyle;
+	keyboardSoundStyle: KeyboardSoundStyle;
+	inputSoundVolume: number;
 }
 
 export interface EditorProjectData {
@@ -504,6 +513,17 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 					),
 				]
 			: [],
+		clickSoundStyle: CLICK_SOUND_STYLES.includes(editor.clickSoundStyle as ClickSoundStyle)
+			? (editor.clickSoundStyle as ClickSoundStyle)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.clickSound,
+		keyboardSoundStyle: KEYBOARD_SOUND_STYLES.includes(
+			editor.keyboardSoundStyle as KeyboardSoundStyle,
+		)
+			? (editor.keyboardSoundStyle as KeyboardSoundStyle)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.keyboardSound,
+		inputSoundVolume: isFiniteNumber(editor.inputSoundVolume)
+			? clamp(editor.inputSoundVolume, 0, 1)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.soundVolume,
 		wallpaper:
 			typeof editor.wallpaper === "string"
 				? normalizeWallpaperValue(editor.wallpaper)

@@ -13,7 +13,9 @@ describe("keyboard event normalization", () => {
 	it("maps Windows and macOS native key codes to DOM-style codes", () => {
 		expect(keyboardCodeFromWindowsVirtualKey(0x4b)).toBe("KeyK");
 		expect(keyboardCodeFromWindowsVirtualKey(0x70)).toBe("F1");
+		expect(keyboardCodeFromWindowsVirtualKey(0xa0)).toBe("ShiftLeft");
 		expect(keyboardCodeFromMacKeyCode(40)).toBe("KeyK");
+		expect(keyboardCodeFromMacKeyCode(56)).toBe("ShiftLeft");
 		expect(keyboardCodeFromMacKeyCode(123)).toBe("ArrowLeft");
 	});
 
@@ -54,6 +56,15 @@ describe("keyboard overlay selection", () => {
 		expect(keyboardEventLabels(event, "win32")).toEqual(["Ctrl", "Win", "K"]);
 	});
 
+	it("shows standalone modifiers without duplicating their label", () => {
+		expect(
+			keyboardEventLabels({ timeMs: 0, code: "ShiftLeft", modifiers: ["shift"] }, "win32"),
+		).toEqual(["Shift"]);
+		expect(
+			keyboardEventLabels({ timeMs: 0, code: "MetaLeft", modifiers: ["meta"] }, "darwin"),
+		).toEqual(["⌘"]);
+	});
+
 	it("skips events disabled from the keyboard timeline", () => {
 		const disabledId = keyboardRecordingEventId(events[1], 1);
 		expect(getActiveKeyboardOverlay(events, 700, false, [disabledId])).toBeNull();
@@ -69,5 +80,9 @@ describe("keyboard overlay selection", () => {
 		expect(getKeyboardOverlayMotion(active, "scale").scale).toBeLessThan(1);
 		expect(getKeyboardOverlayMotion(active, "slide").translateY).toBeGreaterThan(0);
 		expect(getKeyboardOverlayMotion(active, "bounce").scale).toBeGreaterThan(0);
+		expect(getKeyboardOverlayMotion(active, "drop").translateY).toBeLessThan(0);
+		expect(getKeyboardOverlayMotion(active, "rotate").rotateDeg).toBeLessThan(0);
+		expect(getKeyboardOverlayMotion(active, "pulse").scale).toBeGreaterThan(1);
+		expect(getKeyboardOverlayMotion(active, "blur").blur).toBeGreaterThan(0);
 	});
 });
