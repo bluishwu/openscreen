@@ -2,6 +2,7 @@ import { DEFAULT_CURSOR_THEME_ID } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
 import type { ClickSoundStyle, KeyboardSoundStyle } from "@/lib/inputSoundEffects";
 import type {
+	KeyboardCombinationStyle,
 	KeyboardOverlayAnimation,
 	KeyboardOverlayPosition,
 	KeyboardOverlayStyle,
@@ -94,6 +95,7 @@ export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
 	position: "bottom-center",
 	opacity: 0.86,
 	offset: 0.055,
+	combinationStyle: "keycaps",
 	disabledEventIds: [],
 	clickSound: "none",
 	keyboardSound: "none",
@@ -107,6 +109,7 @@ export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
 	position: KeyboardOverlayPosition;
 	opacity: number;
 	offset: number;
+	combinationStyle: KeyboardCombinationStyle;
 	disabledEventIds: string[];
 	clickSound: ClickSoundStyle;
 	keyboardSound: KeyboardSoundStyle;

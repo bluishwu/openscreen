@@ -51,6 +51,7 @@ import {
 	VideoExporter,
 } from "@/lib/exporter";
 import { computeFrameStepTime } from "@/lib/frameStep";
+import { keyboardRecordingEventId, withStableKeyboardEventIds } from "@/lib/keyboardEvents";
 import type { CursorCaptureMode, ProjectMedia } from "@/lib/recordingSession";
 import { matchesShortcut } from "@/lib/shortcuts";
 import {
@@ -219,6 +220,8 @@ export default function VideoEditor() {
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
 		disabledKeyboardEventIds,
+		keyboardEventsOverride,
+		keyboardCombinationStyle,
 		clickSoundStyle,
 		keyboardSoundStyle,
 		inputSoundVolume,
@@ -279,6 +282,59 @@ export default function VideoEditor() {
 		useCursorTelemetry(cursorTelemetrySourcePath);
 	const { data: cursorRecordingData, error: cursorRecordingDataError } =
 		useCursorRecordingData(cursorTelemetrySourcePath);
+	const keyboardEvents = useMemo(
+		() => keyboardEventsOverride ?? cursorRecordingData?.keyboardEvents ?? [],
+		[keyboardEventsOverride, cursorRecordingData],
+	);
+	const effectiveCursorRecordingData = useMemo(() => {
+		if (!cursorRecordingData || cursorRecordingData.keyboardEvents === keyboardEvents) {
+			return cursorRecordingData;
+		}
+		return { ...cursorRecordingData, keyboardEvents };
+	}, [cursorRecordingData, keyboardEvents]);
+
+	const handleKeyboardSpanChange = useCallback(
+		(eventId: string, span: Span) => {
+			pushState((previous) => {
+				const editableEvents = withStableKeyboardEventIds(
+					previous.keyboardEventsOverride ?? cursorRecordingData?.keyboardEvents ?? [],
+				);
+				const nextEvents = editableEvents
+					.map((event, index) =>
+						keyboardRecordingEventId(event, index) === eventId
+							? {
+									...event,
+									timeMs: Math.max(0, Math.round(span.start)),
+									durationMs: Math.max(1, Math.round(span.end - span.start)),
+								}
+							: event,
+					)
+					.sort((a, b) => a.timeMs - b.timeMs);
+				return { keyboardEventsOverride: nextEvents };
+			});
+		},
+		[pushState, cursorRecordingData],
+	);
+
+	const handleKeyboardEdit = useCallback(
+		(eventId: string, displayText: string) => {
+			pushState((previous) => {
+				const editableEvents = withStableKeyboardEventIds(
+					previous.keyboardEventsOverride ?? cursorRecordingData?.keyboardEvents ?? [],
+				);
+				return {
+					keyboardEventsOverride: editableEvents.map((event, index) => {
+						if (keyboardRecordingEventId(event, index) !== eventId) return event;
+						const nextEvent = { ...event };
+						if (displayText.trim()) nextEvent.displayText = displayText.trim();
+						else delete nextEvent.displayText;
+						return nextEvent;
+					}),
+				};
+			});
+		},
+		[pushState, cursorRecordingData],
+	);
 	const cursorClickTimestamps = useMemo<number[]>(() => {
 		const recordingClicks =
 			cursorRecordingData?.samples
@@ -445,6 +501,8 @@ export default function VideoEditor() {
 				keyboardOverlayOpacity: normalizedEditor.keyboardOverlayOpacity,
 				keyboardOverlayOffset: normalizedEditor.keyboardOverlayOffset,
 				disabledKeyboardEventIds: normalizedEditor.disabledKeyboardEventIds,
+				keyboardEventsOverride: normalizedEditor.keyboardEventsOverride,
+				keyboardCombinationStyle: normalizedEditor.keyboardCombinationStyle,
 				clickSoundStyle: normalizedEditor.clickSoundStyle,
 				keyboardSoundStyle: normalizedEditor.keyboardSoundStyle,
 				inputSoundVolume: normalizedEditor.inputSoundVolume,
@@ -534,6 +592,8 @@ export default function VideoEditor() {
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
 			disabledKeyboardEventIds,
+			keyboardEventsOverride,
+			keyboardCombinationStyle,
 			clickSoundStyle,
 			keyboardSoundStyle,
 			inputSoundVolume,
@@ -577,6 +637,8 @@ export default function VideoEditor() {
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
 		disabledKeyboardEventIds,
+		keyboardEventsOverride,
+		keyboardCombinationStyle,
 		clickSoundStyle,
 		keyboardSoundStyle,
 		inputSoundVolume,
@@ -717,6 +779,8 @@ export default function VideoEditor() {
 				keyboardOverlayOpacity,
 				keyboardOverlayOffset,
 				disabledKeyboardEventIds,
+				keyboardEventsOverride,
+				keyboardCombinationStyle,
 				clickSoundStyle,
 				keyboardSoundStyle,
 				inputSoundVolume,
@@ -794,6 +858,8 @@ export default function VideoEditor() {
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
 			disabledKeyboardEventIds,
+			keyboardEventsOverride,
+			keyboardCombinationStyle,
 			clickSoundStyle,
 			keyboardSoundStyle,
 			inputSoundVolume,
@@ -1978,7 +2044,7 @@ export default function VideoEditor() {
 						padding,
 						videoPadding: padding,
 						cropRegion,
-						cursorRecordingData,
+						cursorRecordingData: effectiveCursorRecordingData,
 						cursorScale: effectiveShowCursor ? cursorSize : 0,
 						cursorSmoothing,
 						cursorMotionBlur,
@@ -2001,6 +2067,7 @@ export default function VideoEditor() {
 						showSingleKeyPresses,
 						keyboardOverlaySize,
 						keyboardOverlayStyle,
+						keyboardCombinationStyle,
 						keyboardOverlayAnimation,
 						keyboardOverlayPosition,
 						keyboardOverlayOpacity,
@@ -2082,7 +2149,7 @@ export default function VideoEditor() {
 						borderRadius,
 						padding,
 						cropRegion,
-						cursorRecordingData,
+						cursorRecordingData: effectiveCursorRecordingData,
 						cursorScale: effectiveShowCursor ? cursorSize : 0,
 						cursorSmoothing,
 						cursorMotionBlur,
@@ -2105,6 +2172,7 @@ export default function VideoEditor() {
 						showSingleKeyPresses,
 						keyboardOverlaySize,
 						keyboardOverlayStyle,
+						keyboardCombinationStyle,
 						keyboardOverlayAnimation,
 						keyboardOverlayPosition,
 						keyboardOverlayOpacity,
@@ -2202,7 +2270,7 @@ export default function VideoEditor() {
 			borderRadius,
 			padding,
 			cropRegion,
-			cursorRecordingData,
+			effectiveCursorRecordingData,
 			annotationRegions,
 			isPlaying,
 			aspectRatio,
@@ -2220,6 +2288,7 @@ export default function VideoEditor() {
 			showSingleKeyPresses,
 			keyboardOverlaySize,
 			keyboardOverlayStyle,
+			keyboardCombinationStyle,
 			keyboardOverlayAnimation,
 			keyboardOverlayPosition,
 			keyboardOverlayOpacity,
@@ -2732,7 +2801,7 @@ export default function VideoEditor() {
 													borderRadius={borderRadius}
 													padding={padding}
 													cropRegion={cropRegion}
-													cursorRecordingData={cursorRecordingData}
+													cursorRecordingData={effectiveCursorRecordingData}
 													trimRegions={trimRegions}
 													speedRegions={speedRegions}
 													annotationRegions={annotationOnlyRegions}
@@ -2761,6 +2830,7 @@ export default function VideoEditor() {
 													showSingleKeyPresses={showSingleKeyPresses}
 													keyboardOverlaySize={keyboardOverlaySize}
 													keyboardOverlayStyle={keyboardOverlayStyle}
+													keyboardCombinationStyle={keyboardCombinationStyle}
 													keyboardOverlayAnimation={keyboardOverlayAnimation}
 													keyboardOverlayPosition={keyboardOverlayPosition}
 													keyboardOverlayOpacity={keyboardOverlayOpacity}
@@ -2966,7 +3036,7 @@ export default function VideoEditor() {
 											hasNativeCursorRecordingData(cursorRecordingData)
 										}
 										showCursorSettings={showCursorSettings}
-										hasKeyboardData={(cursorRecordingData?.keyboardEvents.length ?? 0) > 0}
+										hasKeyboardData={keyboardEvents.length > 0}
 										showKeyboardOverlay={showKeyboardOverlay}
 										onShowKeyboardOverlayChange={(show) => pushState({ showKeyboardOverlay: show })}
 										showSingleKeyPresses={showSingleKeyPresses}
@@ -2981,6 +3051,10 @@ export default function VideoEditor() {
 										keyboardOverlayStyle={keyboardOverlayStyle}
 										onKeyboardOverlayStyleChange={(style) =>
 											pushState({ keyboardOverlayStyle: style })
+										}
+										keyboardCombinationStyle={keyboardCombinationStyle}
+										onKeyboardCombinationStyleChange={(combinationStyle) =>
+											pushState({ keyboardCombinationStyle: combinationStyle })
 										}
 										keyboardOverlayAnimation={keyboardOverlayAnimation}
 										onKeyboardOverlayAnimationChange={(animation) =>
@@ -3069,8 +3143,10 @@ export default function VideoEditor() {
 									}
 									videoUrl={videoPath ?? undefined}
 									showTrimWaveform={showTrimWaveform}
-									keyboardEvents={cursorRecordingData?.keyboardEvents ?? []}
+									keyboardEvents={keyboardEvents}
 									disabledKeyboardEventIds={disabledKeyboardEventIds}
+									onKeyboardSpanChange={handleKeyboardSpanChange}
+									onKeyboardEdit={handleKeyboardEdit}
 									platform={nativePlatform ?? "linux"}
 									onToggleKeyboardEvent={(eventId) =>
 										pushState((previous) => ({

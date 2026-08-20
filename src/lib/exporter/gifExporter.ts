@@ -75,6 +75,7 @@ interface GifExporterConfig {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardCombinationStyle?: import("@/lib/keyboardEvents").KeyboardCombinationStyle;
 	keyboardOverlayAnimation?: import("@/lib/keyboardEvents").KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
@@ -203,6 +204,7 @@ export class GifExporter {
 				showSingleKeyPresses: this.config.showSingleKeyPresses,
 				keyboardOverlaySize: this.config.keyboardOverlaySize,
 				keyboardOverlayStyle: this.config.keyboardOverlayStyle,
+				keyboardCombinationStyle: this.config.keyboardCombinationStyle,
 				keyboardOverlayAnimation: this.config.keyboardOverlayAnimation,
 				keyboardOverlayPosition: this.config.keyboardOverlayPosition,
 				keyboardOverlayOpacity: this.config.keyboardOverlayOpacity,

@@ -1,4 +1,5 @@
 import type {
+	KeyboardCombinationStyle,
 	KeyboardOverlayAnimation,
 	KeyboardOverlayPosition,
 	KeyboardOverlayStyle,
@@ -16,6 +17,7 @@ interface KeyboardOverlayRenderOptions {
 	showSingleKeys: boolean;
 	size: number;
 	style: KeyboardOverlayStyle;
+	combinationStyle: KeyboardCombinationStyle;
 	animation: KeyboardOverlayAnimation;
 	position: KeyboardOverlayPosition;
 	backgroundOpacity: number;
@@ -72,6 +74,7 @@ export function renderKeyboardOverlay(
 
 	const unit = Math.max(18, Math.min(options.width, options.height) * 0.028 * options.size);
 	const labels = keyboardEventLabels(active.event, options.platform);
+	const renderedLabels = options.combinationStyle === "plus" ? [labels.join(" + ")] : labels;
 	const motion = getKeyboardOverlayMotion(active, options.animation);
 	const gap = unit * 0.3;
 	const keyHeight = unit * 1.55;
@@ -115,14 +118,14 @@ export function renderKeyboardOverlay(
 	ctx.font = `600 ${unit * 0.78}px ${fontFamily}`;
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
-	const keyWidths = labels.map((label) =>
+	const keyWidths = renderedLabels.map((label) =>
 		Math.max(unit * 1.55, ctx.measureText(label).width + horizontalPadding * 2),
 	);
 	const panelPaddingX = panelHidden ? 0 : unit * 0.55;
 	const panelPaddingY = panelHidden ? 0 : unit * 0.45;
 	const panelWidth =
 		keyWidths.reduce((total, keyWidth) => total + keyWidth, 0) +
-		gap * Math.max(0, labels.length - 1) +
+		gap * Math.max(0, renderedLabels.length - 1) +
 		panelPaddingX * 2;
 	const panelHeight = keyHeight + panelPaddingY * 2;
 	const panel = getPanelPosition(
@@ -193,7 +196,7 @@ export function renderKeyboardOverlay(
 	}
 
 	let keyX = panel.x + panelPaddingX;
-	for (let index = 0; index < labels.length; index += 1) {
+	for (let index = 0; index < renderedLabels.length; index += 1) {
 		const keyWidth = keyWidths[index];
 		const keyY = panel.y + panelPaddingY;
 		roundedRect(ctx, keyX, keyY, keyWidth, keyHeight, unit * keyRadius);
@@ -270,7 +273,7 @@ export function renderKeyboardOverlay(
 						: options.style === "terminal"
 							? "#4ade80"
 							: "#ffffff";
-		ctx.fillText(labels[index], keyX + keyWidth / 2, keyY + keyHeight / 2 + unit * 0.03);
+		ctx.fillText(renderedLabels[index], keyX + keyWidth / 2, keyY + keyHeight / 2 + unit * 0.03);
 		keyX += keyWidth + gap;
 	}
 	ctx.restore();

@@ -87,6 +87,8 @@ describe("projectPersistence media compatibility", () => {
 		expect(defaults.keyboardOverlayOpacity).toBe(0.86);
 		expect(defaults.keyboardOverlayOffset).toBe(0.055);
 		expect(defaults.disabledKeyboardEventIds).toEqual([]);
+		expect(defaults.keyboardEventsOverride).toBeNull();
+		expect(defaults.keyboardCombinationStyle).toBe("keycaps");
 		expect(defaults.clickSoundStyle).toBe("none");
 		expect(defaults.keyboardSoundStyle).toBe("none");
 		expect(defaults.inputSoundVolume).toBe(0.65);
@@ -101,6 +103,17 @@ describe("projectPersistence media compatibility", () => {
 			keyboardOverlayOpacity: -1,
 			keyboardOverlayOffset: 99,
 			disabledKeyboardEventIds: ["event-1", "event-1", 42 as never],
+			keyboardEventsOverride: [
+				{
+					id: "keyboard-1",
+					timeMs: 250,
+					durationMs: 800,
+					code: "KeyK",
+					modifiers: ["control"],
+					displayText: "Command palette",
+				},
+			],
+			keyboardCombinationStyle: "plus",
 			clickSoundStyle: "bubble",
 			keyboardSoundStyle: "typewriter",
 			inputSoundVolume: 99,
@@ -114,6 +127,17 @@ describe("projectPersistence media compatibility", () => {
 		expect(customized.keyboardOverlayOpacity).toBe(0.25);
 		expect(customized.keyboardOverlayOffset).toBe(0.2);
 		expect(customized.disabledKeyboardEventIds).toEqual(["event-1"]);
+		expect(customized.keyboardEventsOverride).toEqual([
+			{
+				id: "keyboard-1",
+				timeMs: 250,
+				durationMs: 800,
+				code: "KeyK",
+				modifiers: ["control"],
+				displayText: "Command palette",
+			},
+		]);
+		expect(customized.keyboardCombinationStyle).toBe("plus");
 		expect(customized.clickSoundStyle).toBe("bubble");
 		expect(customized.keyboardSoundStyle).toBe("typewriter");
 		expect(customized.inputSoundVolume).toBe(1);

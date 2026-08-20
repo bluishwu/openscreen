@@ -9,16 +9,20 @@ import {
 	type KeyboardSoundStyle,
 } from "@/lib/inputSoundEffects";
 import {
+	KEYBOARD_COMBINATION_STYLES,
 	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
 	KEYBOARD_OVERLAY_STYLES,
+	type KeyboardCombinationStyle,
 	type KeyboardOverlayAnimation,
 	type KeyboardOverlayPosition,
 	type KeyboardOverlayStyle,
+	normalizeKeyboardRecordingEvent,
 } from "@/lib/keyboardEvents";
 import type { ProjectMedia } from "@/lib/recordingSession";
 import { normalizeProjectMedia } from "@/lib/recordingSession";
 import { DEFAULT_WALLPAPER, WALLPAPER_PATHS } from "@/lib/wallpaper";
+import type { KeyboardRecordingEvent } from "@/native/contracts";
 import { ASPECT_RATIOS, type AspectRatio, isPortraitAspectRatio } from "@/utils/aspectRatioUtils";
 import {
 	DEFAULT_EDITOR_APPEARANCE_SETTINGS,
@@ -116,6 +120,8 @@ export interface ProjectEditorState {
 	keyboardOverlayOpacity: number;
 	keyboardOverlayOffset: number;
 	disabledKeyboardEventIds: string[];
+	keyboardEventsOverride: KeyboardRecordingEvent[] | null;
+	keyboardCombinationStyle: KeyboardCombinationStyle;
 	clickSoundStyle: ClickSoundStyle;
 	keyboardSoundStyle: KeyboardSoundStyle;
 	inputSoundVolume: number;
@@ -513,6 +519,16 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 					),
 				]
 			: [],
+		keyboardEventsOverride: Array.isArray(editor.keyboardEventsOverride)
+			? editor.keyboardEventsOverride
+					.map((event) => normalizeKeyboardRecordingEvent(event))
+					.filter((event): event is KeyboardRecordingEvent => event !== null)
+			: null,
+		keyboardCombinationStyle: KEYBOARD_COMBINATION_STYLES.includes(
+			editor.keyboardCombinationStyle as KeyboardCombinationStyle,
+		)
+			? (editor.keyboardCombinationStyle as KeyboardCombinationStyle)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.combinationStyle,
 		clickSoundStyle: CLICK_SOUND_STYLES.includes(editor.clickSoundStyle as ClickSoundStyle)
 			? (editor.clickSoundStyle as ClickSoundStyle)
 			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.clickSound,

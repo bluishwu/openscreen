@@ -115,6 +115,7 @@ interface FrameRenderConfig {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardCombinationStyle?: import("@/lib/keyboardEvents").KeyboardCombinationStyle;
 	keyboardOverlayAnimation?: import("@/lib/keyboardEvents").KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
@@ -544,6 +545,7 @@ export class FrameRenderer {
 				showSingleKeys: this.config.showSingleKeyPresses ?? false,
 				size: this.config.keyboardOverlaySize ?? 1,
 				style: this.config.keyboardOverlayStyle ?? "glass",
+				combinationStyle: this.config.keyboardCombinationStyle ?? "keycaps",
 				animation: this.config.keyboardOverlayAnimation ?? "scale",
 				position: this.config.keyboardOverlayPosition ?? "bottom-center",
 				backgroundOpacity: this.config.keyboardOverlayOpacity ?? 0.86,

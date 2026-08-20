@@ -17,7 +17,19 @@
 		"pressAnnotation": "Press A to add annotation",
 		"pressBlur": "Press B to add blur region",
 		"pressSpeed": "Press S to add speed",
-		"keyboard": "Recorded shortcuts appear here — click one to disable it"
+		"keyboard": "Drag shortcuts to move them, resize either edge, or double-click to edit"
+	},
+	"keyboard": {
+		"doubleClickToEdit": "Double-click to edit",
+		"resizeStart": "Drag to change the start",
+		"resizeEnd": "Drag to change the end",
+		"enable": "Show this key press",
+		"disable": "Hide this key press",
+		"editTitle": "Edit key press",
+		"editDescription": "Enter the text shown in the video. Leave it blank to restore the captured key labels.",
+		"editPlaceholder": "For example: Ctrl + K",
+		"cancel": "Cancel",
+		"save": "Save"
 	},
 	"labels": {
 		"pan": "Pan",

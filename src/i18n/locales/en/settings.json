@@ -238,6 +238,11 @@
 		"singleKeys": "Show single key presses",
 		"size": "Label size",
 		"style": "Style",
+		"combination": "Shortcut layout",
+		"combinations": {
+			"keycaps": "Separate keycaps",
+			"plus": "Join with +"
+		},
 		"animation": "Animation",
 		"position": "Position",
 		"opacity": "Background opacity",

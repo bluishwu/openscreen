@@ -25,6 +25,7 @@ import {
 import { useScopedT } from "@/contexts/I18nContext";
 import { useShortcuts } from "@/contexts/ShortcutsContext";
 import { useAudioPeaks } from "@/hooks/useAudioPeaks";
+import { keyboardRecordingEventId } from "@/lib/keyboardEvents";
 import { matchesShortcut } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
 import type { KeyboardRecordingEvent } from "@/native/contracts";
@@ -96,6 +97,8 @@ interface TimelineEditorProps {
 	keyboardEvents?: KeyboardRecordingEvent[];
 	disabledKeyboardEventIds?: string[];
 	onToggleKeyboardEvent?: (eventId: string) => void;
+	onKeyboardSpanChange?: (eventId: string, span: Span) => void;
+	onKeyboardEdit?: (eventId: string, displayText: string) => void;
 	platform?: string;
 	/** Opens the auto-captions flow. When omitted, the captions button is hidden. */
 	onGenerateCaptions?: () => void;
@@ -162,8 +165,8 @@ function calculateAxisScale(visibleRangeMs: number): { intervalMs: number; gridM
 function calculateTimelineScale(durationSeconds: number): TimelineScaleConfig {
 	const totalMs = Math.max(0, Math.round(durationSeconds * 1000));
 
-	// 100ms, precise enough to cut but still grabbable.
-	const minItemDurationMs = 100;
+	// 20ms keeps brief keyboard presses editable without rounding them up to a generic click.
+	const minItemDurationMs = 20;
 
 	// 5% of duration, clamped to 1-30s.
 	const defaultItemDurationMs =
@@ -581,6 +584,7 @@ function Timeline({
 	keyboardEvents = [],
 	disabledKeyboardEventIds = [],
 	onToggleKeyboardEvent,
+	onKeyboardEdit,
 	platform = "linux",
 }: {
 	items: TimelineRenderItem[];
@@ -604,6 +608,7 @@ function Timeline({
 	keyboardEvents?: KeyboardRecordingEvent[];
 	disabledKeyboardEventIds?: string[];
 	onToggleKeyboardEvent?: (eventId: string) => void;
+	onKeyboardEdit?: (eventId: string, displayText: string) => void;
 	platform?: string;
 }) {
 	const t = useScopedT("timeline");
@@ -814,7 +819,9 @@ function Timeline({
 					events={keyboardEvents}
 					disabledEventIds={disabledKeyboardEventIds}
 					platform={platform}
+					rowId={KEYBOARD_ROW_ID}
 					onToggleEvent={onToggleKeyboardEvent}
+					onEditEvent={onKeyboardEdit}
 				/>
 			</Row>
 
@@ -952,6 +959,8 @@ export default function TimelineEditor({
 	keyboardEvents = [],
 	disabledKeyboardEventIds = [],
 	onToggleKeyboardEvent,
+	onKeyboardSpanChange,
+	onKeyboardEdit,
 	platform = "linux",
 	onGenerateCaptions,
 	isGeneratingCaptions = false,
@@ -1465,6 +1474,10 @@ export default function TimelineEditor({
 				onAnnotationSpanChange?.(id, span);
 			} else if (blurRegions.some((r) => r.id === id)) {
 				onBlurSpanChange?.(id, span);
+			} else if (
+				keyboardEvents.some((event, index) => keyboardRecordingEventId(event, index) === id)
+			) {
+				onKeyboardSpanChange?.(id, span);
 			}
 		},
 		[
@@ -1478,6 +1491,8 @@ export default function TimelineEditor({
 			onSpeedSpanChange,
 			onAnnotationSpanChange,
 			onBlurSpanChange,
+			keyboardEvents,
+			onKeyboardSpanChange,
 		],
 	);
 
@@ -1691,6 +1706,7 @@ export default function TimelineEditor({
 						keyboardEvents={keyboardEvents}
 						disabledKeyboardEventIds={disabledKeyboardEventIds}
 						onToggleKeyboardEvent={onToggleKeyboardEvent}
+						onKeyboardEdit={onKeyboardEdit}
 						platform={platform}
 					/>
 				</TimelineWrapper>

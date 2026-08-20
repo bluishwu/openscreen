@@ -22,10 +22,12 @@ import {
 } from "@/components/video-editor/types";
 import type { ClickSoundStyle, KeyboardSoundStyle } from "@/lib/inputSoundEffects";
 import type {
+	KeyboardCombinationStyle,
 	KeyboardOverlayAnimation,
 	KeyboardOverlayPosition,
 	KeyboardOverlayStyle,
 } from "@/lib/keyboardEvents";
+import type { KeyboardRecordingEvent } from "@/native/contracts";
 import type { AspectRatio } from "@/utils/aspectRatioUtils";
 
 // Undoable state. Selection IDs are excluded, since undoing a selection change
@@ -64,6 +66,8 @@ export interface EditorState {
 	keyboardOverlayOpacity: number;
 	keyboardOverlayOffset: number;
 	disabledKeyboardEventIds: string[];
+	keyboardEventsOverride: KeyboardRecordingEvent[] | null;
+	keyboardCombinationStyle: KeyboardCombinationStyle;
 	clickSoundStyle: ClickSoundStyle;
 	keyboardSoundStyle: KeyboardSoundStyle;
 	inputSoundVolume: number;
@@ -100,6 +104,8 @@ export const INITIAL_EDITOR_STATE: EditorState = {
 	keyboardOverlayOpacity: 0.86,
 	keyboardOverlayOffset: 0.055,
 	disabledKeyboardEventIds: [],
+	keyboardEventsOverride: null,
+	keyboardCombinationStyle: "keycaps",
 	clickSoundStyle: "none",
 	keyboardSoundStyle: "none",
 	inputSoundVolume: 0.65,

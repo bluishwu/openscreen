@@ -46,6 +46,7 @@ import {
 	playInputSound,
 } from "@/lib/inputSoundEffects";
 import {
+	type KeyboardCombinationStyle,
 	type KeyboardOverlayAnimation,
 	type KeyboardOverlayPosition,
 	type KeyboardOverlayStyle,
@@ -163,6 +164,7 @@ interface VideoPlaybackProps {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: KeyboardOverlayStyle;
+	keyboardCombinationStyle?: KeyboardCombinationStyle;
 	keyboardOverlayAnimation?: KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
@@ -304,6 +306,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			showSingleKeyPresses = false,
 			keyboardOverlaySize = 1,
 			keyboardOverlayStyle = "glass",
+			keyboardCombinationStyle = "keycaps",
 			keyboardOverlayAnimation = "scale",
 			keyboardOverlayPosition = "bottom-center",
 			keyboardOverlayOpacity = 0.86,
@@ -2219,6 +2222,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 					showSingleKeys={showSingleKeyPresses}
 					size={keyboardOverlaySize}
 					style={keyboardOverlayStyle}
+					combinationStyle={keyboardCombinationStyle}
 					animation={keyboardOverlayAnimation}
 					position={keyboardOverlayPosition}
 					backgroundOpacity={keyboardOverlayOpacity}

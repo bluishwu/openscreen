@@ -61,9 +61,11 @@ import {
 	previewInputSound,
 } from "@/lib/inputSoundEffects";
 import {
+	KEYBOARD_COMBINATION_STYLES,
 	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
 	KEYBOARD_OVERLAY_STYLES,
+	type KeyboardCombinationStyle,
 	type KeyboardOverlayAnimation,
 	type KeyboardOverlayPosition,
 	type KeyboardOverlayStyle,
@@ -377,6 +379,8 @@ interface SettingsPanelProps {
 	onKeyboardOverlaySizeCommit?: () => void;
 	keyboardOverlayStyle?: KeyboardOverlayStyle;
 	onKeyboardOverlayStyleChange?: (style: KeyboardOverlayStyle) => void;
+	keyboardCombinationStyle?: KeyboardCombinationStyle;
+	onKeyboardCombinationStyleChange?: (style: KeyboardCombinationStyle) => void;
 	keyboardOverlayAnimation?: KeyboardOverlayAnimation;
 	onKeyboardOverlayAnimationChange?: (animation: KeyboardOverlayAnimation) => void;
 	keyboardOverlayPosition?: KeyboardOverlayPosition;
@@ -562,6 +566,8 @@ export function SettingsPanel({
 	onKeyboardOverlaySizeCommit,
 	keyboardOverlayStyle = "glass",
 	onKeyboardOverlayStyleChange,
+	keyboardCombinationStyle = "keycaps",
+	onKeyboardCombinationStyleChange,
 	keyboardOverlayAnimation = "scale",
 	onKeyboardOverlayAnimationChange,
 	keyboardOverlayPosition = "bottom-center",
@@ -1851,6 +1857,30 @@ export function SettingsPanel({
 															onCheckedChange={onShowSingleKeyPressesChange}
 															className="data-[state=checked]:bg-[#34B27B] scale-90"
 														/>
+													</div>
+													<div className="space-y-1.5">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.combination")}
+														</div>
+														<div className="grid grid-cols-2 gap-1.5">
+															{KEYBOARD_COMBINATION_STYLES.map((combinationStyle) => (
+																<button
+																	type="button"
+																	key={combinationStyle}
+																	onClick={() =>
+																		onKeyboardCombinationStyleChange?.(combinationStyle)
+																	}
+																	className={cn(
+																		"h-8 rounded-md border px-2 text-[9px] font-medium transition-all",
+																		keyboardCombinationStyle === combinationStyle
+																			? "border-[#34B27B]/60 bg-[#34B27B]/10 text-white"
+																			: "border-white/[0.07] bg-white/[0.035] text-slate-400 hover:bg-white/[0.07]",
+																	)}
+																>
+																	{t(`keyboard.combinations.${combinationStyle}`)}
+																</button>
+															))}
+														</div>
 													</div>
 													<div className="space-y-1.5">
 														<div className="text-[10px] font-medium text-slate-300">

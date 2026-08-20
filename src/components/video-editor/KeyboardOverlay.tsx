@@ -1,4 +1,5 @@
 import type {
+	KeyboardCombinationStyle,
 	KeyboardOverlayAnimation,
 	KeyboardOverlayPosition,
 	KeyboardOverlayStyle,
@@ -17,6 +18,7 @@ interface KeyboardOverlayProps {
 	showSingleKeys: boolean;
 	size: number;
 	style: KeyboardOverlayStyle;
+	combinationStyle: KeyboardCombinationStyle;
 	animation: KeyboardOverlayAnimation;
 	position: KeyboardOverlayPosition;
 	backgroundOpacity: number;
@@ -202,6 +204,7 @@ export function KeyboardOverlay({
 	showSingleKeys,
 	size,
 	style,
+	combinationStyle,
 	animation,
 	position,
 	backgroundOpacity,
@@ -217,6 +220,7 @@ export function KeyboardOverlay({
 
 	const unit = Math.max(10, Math.min(canvasWidth, canvasHeight) * 0.028 * size);
 	const labels = keyboardEventLabels(active.event, platform);
+	const renderedLabels = combinationStyle === "plus" ? [labels.join(" + ")] : labels;
 	const theme = overlayTheme(style, backgroundOpacity);
 	const minimal = style === "minimal";
 	const motion = getKeyboardOverlayMotion(active, animation);
@@ -246,7 +250,7 @@ export function KeyboardOverlay({
 					transformOrigin: position.startsWith("top") ? "top center" : "bottom center",
 				}}
 			>
-				{labels.map((label, index) => (
+				{renderedLabels.map((label, index) => (
 					<div
 						key={`${label}-${index}`}
 						className="flex items-center justify-center font-semibold"

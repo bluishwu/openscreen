@@ -38,9 +38,13 @@ export type KeyboardModifier = "control" | "alt" | "shift" | "meta";
 
 /** A distinct key press, including standalone modifiers, captured while recording. */
 export interface KeyboardRecordingEvent {
+	/** Stable editor identity. Native recordings may omit it until first edit. */
+	id?: string;
 	timeMs: number;
 	/** Physical press duration measured from key-down to key-up. */
 	durationMs?: number;
+	/** Optional user-authored text shown instead of the captured key labels. */
+	displayText?: string;
 	/** DOM-style physical key code (for example `KeyK`, `Enter`, or `ArrowLeft`). */
 	code: string;
 	modifiers: KeyboardModifier[];

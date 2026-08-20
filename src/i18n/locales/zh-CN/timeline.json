@@ -13,7 +13,19 @@
 		"pressAnnotation": "按 A 添加标注",
 		"pressSpeed": "按 S 添加速度",
 		"pressBlur": "按 B 添加模糊区域",
-		"keyboard": "录制的快捷键会显示在这里，点击可禁用"
+		"keyboard": "拖动按键可移动位置，拖动两端可改时长，双击可编辑内容"
+	},
+	"keyboard": {
+		"doubleClickToEdit": "双击编辑内容",
+		"resizeStart": "拖动以调整开始时间",
+		"resizeEnd": "拖动以调整结束时间",
+		"enable": "显示这个按键",
+		"disable": "隐藏这个按键",
+		"editTitle": "编辑按键内容",
+		"editDescription": "输入视频中显示的文字；留空保存可恢复为录制到的按键名称。",
+		"editPlaceholder": "例如：Ctrl + K",
+		"cancel": "取消",
+		"save": "保存"
 	},
 	"labels": {
 		"pan": "平移",

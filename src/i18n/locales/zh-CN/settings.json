@@ -227,6 +227,11 @@
 		"singleKeys": "显示单键按下",
 		"size": "标签大小",
 		"style": "样式",
+		"combination": "组合键样式",
+		"combinations": {
+			"keycaps": "独立键帽",
+			"plus": "用 + 连接"
+		},
 		"animation": "出现动画",
 		"position": "摆放位置",
 		"opacity": "背景透明度",

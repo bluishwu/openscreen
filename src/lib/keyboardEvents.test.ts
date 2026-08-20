@@ -8,6 +8,7 @@ import {
 	keyboardPressDurationMs,
 	keyboardRecordingEventId,
 	normalizeKeyboardRecordingEvent,
+	withStableKeyboardEventIds,
 } from "./keyboardEvents";
 
 describe("keyboard event normalization", () => {
@@ -33,10 +34,16 @@ describe("keyboard event normalization", () => {
 			normalizeKeyboardRecordingEvent({
 				timeMs: 10,
 				durationMs: 425,
+				id: " key-event-1 ",
+				displayText: " Save project ",
 				code: "Space",
 				modifiers: [],
 			}),
-		).toMatchObject({ durationMs: 425 });
+		).toMatchObject({
+			durationMs: 425,
+			id: "key-event-1",
+			displayText: "Save project",
+		});
 	});
 
 	it("uses captured press duration with a legacy fallback", () => {
@@ -45,12 +52,17 @@ describe("keyboard event normalization", () => {
 		).toBe(640);
 		expect(keyboardPressDurationMs({ timeMs: 0, code: "Space", modifiers: [] })).toBe(80);
 	});
+
+	it("assigns stable IDs without changing legacy timeline identifiers", () => {
+		const event = { timeMs: 120, code: "KeyK", modifiers: ["control"] as const };
+		expect(withStableKeyboardEventIds([event])[0].id).toBe(keyboardRecordingEventId(event, 0));
+	});
 });
 
 describe("keyboard overlay selection", () => {
 	const events = [
-		{ timeMs: 100, code: "KeyA", modifiers: [] as const },
-		{ timeMs: 500, code: "KeyK", modifiers: ["meta"] as const },
+		{ timeMs: 100, durationMs: 1_400, code: "KeyA", modifiers: [] as const },
+		{ timeMs: 500, durationMs: 1_400, code: "KeyK", modifiers: ["meta"] as const },
 	];
 
 	it("shows shortcuts while hiding plain typing by default", () => {
@@ -70,6 +82,19 @@ describe("keyboard overlay selection", () => {
 		const event = { timeMs: 0, code: "KeyK", modifiers: ["control", "meta"] as const };
 		expect(keyboardEventLabels(event, "darwin")).toEqual(["⌃", "⌘", "K"]);
 		expect(keyboardEventLabels(event, "win32")).toEqual(["Ctrl", "Win", "K"]);
+	});
+
+	it("uses manually edited display text and the exact editable duration", () => {
+		const event = {
+			timeMs: 100,
+			durationMs: 250,
+			code: "KeyK",
+			modifiers: ["control"] as const,
+			displayText: "Open command palette",
+		};
+		expect(keyboardEventLabels(event, "win32")).toEqual(["Open command palette"]);
+		expect(getActiveKeyboardOverlay([event], 349, false)?.event).toBe(event);
+		expect(getActiveKeyboardOverlay([event], 350, false)).toBeNull();
 	});
 
 	it("shows standalone modifiers without duplicating their label", () => {

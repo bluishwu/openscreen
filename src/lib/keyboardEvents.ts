@@ -1,6 +1,5 @@
 import type { KeyboardModifier, KeyboardRecordingEvent } from "@/native/contracts";
 
-export const KEYBOARD_OVERLAY_DURATION_MS = 1_400;
 export const KEYBOARD_OVERLAY_FADE_MS = 220;
 export const LEGACY_KEYBOARD_PRESS_DURATION_MS = 80;
 
@@ -25,6 +24,7 @@ export type KeyboardOverlayAnimation =
 	| "rotate"
 	| "pulse"
 	| "blur";
+export type KeyboardCombinationStyle = "keycaps" | "plus";
 export type KeyboardOverlayPosition =
 	| "top-left"
 	| "top-center"
@@ -57,6 +57,7 @@ export const KEYBOARD_OVERLAY_ANIMATIONS: KeyboardOverlayAnimation[] = [
 	"pulse",
 	"blur",
 ];
+export const KEYBOARD_COMBINATION_STYLES: KeyboardCombinationStyle[] = ["keycaps", "plus"];
 
 export const KEYBOARD_OVERLAY_POSITIONS: KeyboardOverlayPosition[] = [
 	"top-left",
@@ -308,6 +309,10 @@ export function normalizeKeyboardRecordingEvent(value: unknown): KeyboardRecordi
 	if (typeof candidate.durationMs === "number" && Number.isFinite(candidate.durationMs)) {
 		normalized.durationMs = Math.max(0, candidate.durationMs);
 	}
+	if (typeof candidate.id === "string" && candidate.id.trim()) normalized.id = candidate.id.trim();
+	if (typeof candidate.displayText === "string" && candidate.displayText.trim()) {
+		normalized.displayText = candidate.displayText.trim();
+	}
 	return normalized;
 }
 
@@ -321,6 +326,7 @@ export function keyboardEventLabels(
 	event: KeyboardRecordingEvent,
 	platform: "darwin" | "win32" | "linux" | string,
 ): string[] {
+	if (event.displayText?.trim()) return [event.displayText.trim()];
 	const mac = platform === "darwin";
 	const modifierLabels: Record<KeyboardModifier, string> = mac
 		? { control: "⌃", alt: "⌥", shift: "⇧", meta: "⌘" }
@@ -414,7 +420,15 @@ export function getKeyboardOverlayMotion(
 }
 
 export function keyboardRecordingEventId(event: KeyboardRecordingEvent, index: number): string {
+	if (event.id) return event.id;
 	return `${Math.round(event.timeMs)}:${event.code}:${event.modifiers.join(".")}:${index}`;
+}
+
+export function withStableKeyboardEventIds(events: readonly KeyboardRecordingEvent[]) {
+	return events.map((event, index) => ({
+		...event,
+		id: event.id ?? keyboardRecordingEventId(event, index),
+	}));
 }
 
 export function getActiveKeyboardOverlay(
@@ -430,12 +444,13 @@ export function getActiveKeyboardOverlay(
 		if (disabled.has(keyboardRecordingEventId(event, index))) continue;
 		if (!showSingleKeys && event.modifiers.length === 0) continue;
 		const age = timeMs - event.timeMs;
-		const displayDuration = Math.max(KEYBOARD_OVERLAY_DURATION_MS, keyboardPressDurationMs(event));
+		const displayDuration = Math.max(1, keyboardPressDurationMs(event));
 		if (age >= displayDuration) return null;
-		const fadeStart = displayDuration - KEYBOARD_OVERLAY_FADE_MS;
+		const fadeDuration = Math.min(KEYBOARD_OVERLAY_FADE_MS, displayDuration * 0.35);
+		const fadeStart = displayDuration - fadeDuration;
 		return {
 			event,
-			opacity: age <= fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / KEYBOARD_OVERLAY_FADE_MS),
+			opacity: age <= fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / fadeDuration),
 			ageMs: age,
 		};
 	}
