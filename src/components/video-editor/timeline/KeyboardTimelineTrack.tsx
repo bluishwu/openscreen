@@ -2,8 +2,8 @@ import { useTimelineContext } from "dnd-timeline";
 import { Keyboard } from "lucide-react";
 import { useMemo } from "react";
 import {
-	KEYBOARD_OVERLAY_DURATION_MS,
 	keyboardEventLabels,
+	keyboardPressDurationMs,
 	keyboardRecordingEventId,
 } from "@/lib/keyboardEvents";
 import { cn } from "@/lib/utils";
@@ -29,13 +29,13 @@ export default function KeyboardTimelineTrack({
 		() =>
 			events
 				.map((event, index) => {
-					const nextTime = events[index + 1]?.timeMs ?? Number.POSITIVE_INFINITY;
-					const endMs = Math.min(event.timeMs + KEYBOARD_OVERLAY_DURATION_MS, nextTime);
+					const durationMs = keyboardPressDurationMs(event);
 					return {
 						event,
 						id: keyboardRecordingEventId(event, index),
 						startMs: event.timeMs,
-						endMs: Math.max(event.timeMs + 80, endMs),
+						endMs: event.timeMs + durationMs,
+						durationMs,
 						label: keyboardEventLabels(event, platform).join(" + "),
 					};
 				})
@@ -49,7 +49,7 @@ export default function KeyboardTimelineTrack({
 				const visibleStart = Math.max(item.startMs, range.start);
 				const visibleEnd = Math.min(item.endMs, range.end);
 				const offset = valueToPixels(visibleStart - range.start);
-				const width = Math.max(24, valueToPixels(Math.max(visibleEnd - visibleStart, 1)) - 2);
+				const width = Math.max(2, valueToPixels(Math.max(visibleEnd - visibleStart, 1)) - 2);
 				const isDisabled = disabled.has(item.id);
 				return (
 					<button
@@ -62,7 +62,7 @@ export default function KeyboardTimelineTrack({
 								: "border-violet-300/25 bg-violet-500/20 text-violet-100 hover:bg-violet-500/30 hover:border-violet-300/40",
 						)}
 						style={{ [sideProperty]: offset, width }}
-						title={`${item.label} · ${isDisabled ? "Enable" : "Disable"}`}
+						title={`${item.label} · ${Math.round(item.durationMs)} ms · ${isDisabled ? "Enable" : "Disable"}`}
 						onPointerDown={(event) => event.stopPropagation()}
 						onClick={(event) => {
 							event.stopPropagation();

@@ -36,6 +36,7 @@ export interface WindowsKeyboardEvent {
 	type: "key";
 	timestampMs: number;
 	virtualKey: number;
+	down: boolean;
 	control: boolean;
 	alt: boolean;
 	shift: boolean;

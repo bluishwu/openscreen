@@ -73,15 +73,16 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
             if (isModifierKey(virtualKey)) {
                 updateModifierState(virtualKey, isDown);
             }
-            if (isDown && !wasDown) {
-                char buf[256];
-                std::snprintf(
+			if ((isDown && !wasDown) || (isUp && wasDown)) {
+				char buf[256];
+				std::snprintf(
                     buf,
                     sizeof(buf),
                     "{\"type\":\"key\",\"timestampMs\":%" PRId64
-                    ",\"virtualKey\":%lu,\"control\":%s,\"alt\":%s,\"shift\":%s,\"meta\":%s}",
-                    nowMs(),
-                    static_cast<unsigned long>(virtualKey),
+					",\"virtualKey\":%lu,\"down\":%s,\"control\":%s,\"alt\":%s,\"shift\":%s,\"meta\":%s}",
+					nowMs(),
+					static_cast<unsigned long>(virtualKey),
+					isDown ? "true" : "false",
                     g_controlDown ? "true" : "false",
                     (g_altDown || (event->flags & LLKHF_ALTDOWN) != 0) ? "true" : "false",
                     g_shiftDown ? "true" : "false",
@@ -513,8 +514,8 @@ int main(int argc, char* argv[]) {
     }
 
     // The keyboard hook shares the cursor helper's lifetime. It emits distinct
-    // key-down events (including standalone modifiers) plus modifier flags;
-    // key-up events and repeats are used for state tracking but are never persisted.
+	// key-down and key-up transitions (including standalone modifiers) plus modifier
+	// flags; auto-repeat events are used for state tracking but are never persisted.
     g_keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandle(nullptr), 0);
     if (!g_keyboardHook) {
         std::cerr << "SetWindowsHookEx(WH_KEYBOARD_LL) failed; shortcut capture disabled" << std::endl;

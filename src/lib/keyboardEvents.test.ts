@@ -5,6 +5,7 @@ import {
 	keyboardCodeFromMacKeyCode,
 	keyboardCodeFromWindowsVirtualKey,
 	keyboardEventLabels,
+	keyboardPressDurationMs,
 	keyboardRecordingEventId,
 	normalizeKeyboardRecordingEvent,
 } from "./keyboardEvents";
@@ -28,6 +29,21 @@ describe("keyboard event normalization", () => {
 				modifiers: ["control", "control", "invalid"],
 			}),
 		).toEqual({ timeMs: 0, code: "KeyA", modifiers: ["control"] });
+		expect(
+			normalizeKeyboardRecordingEvent({
+				timeMs: 10,
+				durationMs: 425,
+				code: "Space",
+				modifiers: [],
+			}),
+		).toMatchObject({ durationMs: 425 });
+	});
+
+	it("uses captured press duration with a legacy fallback", () => {
+		expect(
+			keyboardPressDurationMs({ timeMs: 0, durationMs: 640, code: "Space", modifiers: [] }),
+		).toBe(640);
+		expect(keyboardPressDurationMs({ timeMs: 0, code: "Space", modifiers: [] })).toBe(80);
 	});
 });
 

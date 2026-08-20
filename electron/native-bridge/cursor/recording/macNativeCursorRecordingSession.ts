@@ -52,6 +52,7 @@ type MacCursorEvent =
 			type: "key";
 			timestampMs: number;
 			keyCode: number;
+			down: boolean;
 			control?: boolean;
 			alt?: boolean;
 			shift?: boolean;
@@ -206,6 +207,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 	private previousLeftButtonDown = false;
 	private consecutiveOutsideSamples = 0;
 	private keyboardEvents: KeyboardRecordingEvent[] = [];
+	private activeKeyboardEvents = new Map<string, KeyboardRecordingEvent>();
 	// Hide only after this many consecutive out-of-bounds samples (~100ms at 33ms interval).
 	// Fast swipes that briefly exit the display are clipped by clip-path instead of disappearing.
 	private static readonly OUTSIDE_HIDE_THRESHOLD = 3;
@@ -220,6 +222,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 		this.previousLeftButtonDown = false;
 		this.consecutiveOutsideSamples = 0;
 		this.keyboardEvents = [];
+		this.activeKeyboardEvents.clear();
 
 		try {
 			systemPreferences.isTrustedAccessibilityClient(true);
@@ -290,6 +293,7 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 		if (child) {
 			this.killHelperProcess(child);
 		}
+		this.finishHeldKeys(Math.max(0, Date.now() - this.startTimeMs));
 
 		return {
 			version: 2,
@@ -372,18 +376,42 @@ export class MacNativeCursorRecordingSession implements CursorRecordingSession {
 		if (payload.type === "key") {
 			const code = keyboardCodeFromMacKeyCode(payload.keyCode);
 			if (!code) return;
+			const timeMs = Math.max(0, payload.timestampMs - this.startTimeMs);
+			if (!payload.down) {
+				const active = this.activeKeyboardEvents.get(code);
+				if (active) {
+					active.durationMs = Math.max(0, timeMs - active.timeMs);
+					this.activeKeyboardEvents.delete(code);
+				}
+				return;
+			}
+			if (this.activeKeyboardEvents.has(code)) return;
 			const modifiers: KeyboardModifier[] = [];
 			if (payload.control) modifiers.push("control");
 			if (payload.alt) modifiers.push("alt");
 			if (payload.shift) modifiers.push("shift");
 			if (payload.meta) modifiers.push("meta");
-			this.keyboardEvents.push({
-				timeMs: Math.max(0, payload.timestampMs - this.startTimeMs),
+			const keyboardEvent: KeyboardRecordingEvent = {
+				timeMs,
 				code,
 				modifiers,
-			});
-			if (this.keyboardEvents.length > this.options.maxSamples) this.keyboardEvents.shift();
+			};
+			this.keyboardEvents.push(keyboardEvent);
+			this.activeKeyboardEvents.set(code, keyboardEvent);
+			if (this.keyboardEvents.length > this.options.maxSamples) {
+				const removed = this.keyboardEvents.shift();
+				if (removed && this.activeKeyboardEvents.get(removed.code) === removed) {
+					this.activeKeyboardEvents.delete(removed.code);
+				}
+			}
 		}
+	}
+
+	private finishHeldKeys(endTimeMs: number) {
+		for (const event of this.activeKeyboardEvents.values()) {
+			event.durationMs = Math.max(0, endTimeMs - event.timeMs);
+		}
+		this.activeKeyboardEvents.clear();
 	}
 
 	private captureSample(

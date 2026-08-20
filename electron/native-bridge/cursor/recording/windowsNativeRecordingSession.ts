@@ -63,6 +63,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 	private outOfBoundsSampleCount = 0;
 	private previousLeftButtonDown = false;
 	private keyboardEvents: KeyboardRecordingEvent[] = [];
+	private activeKeyboardEvents = new Map<string, KeyboardRecordingEvent>();
 
 	constructor(private readonly options: WindowsNativeRecordingSessionOptions) {}
 
@@ -75,6 +76,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		this.outOfBoundsSampleCount = 0;
 		this.previousLeftButtonDown = false;
 		this.keyboardEvents = [];
+		this.activeKeyboardEvents.clear();
 
 		const helperPath = findCursorSamplerPath();
 		if (!helperPath) {
@@ -141,6 +143,7 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		this.clearReadyState();
 
 		this.killHelperProcess(child);
+		this.finishHeldKeys(Math.max(0, Date.now() - this.startTimeMs));
 
 		this.logDiagnostic("stop", {
 			sampleCount: this.sampleCount,
@@ -194,17 +197,34 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		if (payload.type === "key") {
 			const code = keyboardCodeFromWindowsVirtualKey(payload.virtualKey);
 			if (!code) return;
+			const timeMs = Math.max(0, payload.timestampMs - this.startTimeMs);
+			if (!payload.down) {
+				const active = this.activeKeyboardEvents.get(code);
+				if (active) {
+					active.durationMs = Math.max(0, timeMs - active.timeMs);
+					this.activeKeyboardEvents.delete(code);
+				}
+				return;
+			}
+			if (this.activeKeyboardEvents.has(code)) return;
 			const modifiers: KeyboardModifier[] = [];
 			if (payload.control) modifiers.push("control");
 			if (payload.alt) modifiers.push("alt");
 			if (payload.shift) modifiers.push("shift");
 			if (payload.meta) modifiers.push("meta");
-			this.keyboardEvents.push({
-				timeMs: Math.max(0, payload.timestampMs - this.startTimeMs),
+			const keyboardEvent: KeyboardRecordingEvent = {
+				timeMs,
 				code,
 				modifiers,
-			});
-			if (this.keyboardEvents.length > this.options.maxSamples) this.keyboardEvents.shift();
+			};
+			this.keyboardEvents.push(keyboardEvent);
+			this.activeKeyboardEvents.set(code, keyboardEvent);
+			if (this.keyboardEvents.length > this.options.maxSamples) {
+				const removed = this.keyboardEvents.shift();
+				if (removed && this.activeKeyboardEvents.get(removed.code) === removed) {
+					this.activeKeyboardEvents.delete(removed.code);
+				}
+			}
 			return;
 		}
 
@@ -242,6 +262,13 @@ export class WindowsNativeRecordingSession implements CursorRecordingSession {
 		if (this.samples.length > this.options.maxSamples) {
 			this.samples.shift();
 		}
+	}
+
+	private finishHeldKeys(endTimeMs: number) {
+		for (const event of this.activeKeyboardEvents.values()) {
+			event.durationMs = Math.max(0, endTimeMs - event.timeMs);
+		}
+		this.activeKeyboardEvents.clear();
 	}
 
 	private normalizeSample(

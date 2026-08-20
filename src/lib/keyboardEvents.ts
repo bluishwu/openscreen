@@ -2,6 +2,7 @@ import type { KeyboardModifier, KeyboardRecordingEvent } from "@/native/contract
 
 export const KEYBOARD_OVERLAY_DURATION_MS = 1_400;
 export const KEYBOARD_OVERLAY_FADE_MS = 220;
+export const LEGACY_KEYBOARD_PRESS_DURATION_MS = 80;
 
 export type KeyboardOverlayStyle =
 	| "glass"
@@ -299,11 +300,21 @@ export function normalizeKeyboardRecordingEvent(value: unknown): KeyboardRecordi
 		return null;
 	}
 
-	return {
+	const normalized: KeyboardRecordingEvent = {
 		timeMs: Math.max(0, candidate.timeMs),
 		code: candidate.code.trim(),
 		modifiers: normalizeKeyboardModifiers(candidate.modifiers),
 	};
+	if (typeof candidate.durationMs === "number" && Number.isFinite(candidate.durationMs)) {
+		normalized.durationMs = Math.max(0, candidate.durationMs);
+	}
+	return normalized;
+}
+
+export function keyboardPressDurationMs(event: KeyboardRecordingEvent): number {
+	return typeof event.durationMs === "number" && Number.isFinite(event.durationMs)
+		? Math.max(0, event.durationMs)
+		: LEGACY_KEYBOARD_PRESS_DURATION_MS;
 }
 
 export function keyboardEventLabels(
@@ -419,8 +430,9 @@ export function getActiveKeyboardOverlay(
 		if (disabled.has(keyboardRecordingEventId(event, index))) continue;
 		if (!showSingleKeys && event.modifiers.length === 0) continue;
 		const age = timeMs - event.timeMs;
-		if (age >= KEYBOARD_OVERLAY_DURATION_MS) return null;
-		const fadeStart = KEYBOARD_OVERLAY_DURATION_MS - KEYBOARD_OVERLAY_FADE_MS;
+		const displayDuration = Math.max(KEYBOARD_OVERLAY_DURATION_MS, keyboardPressDurationMs(event));
+		if (age >= displayDuration) return null;
+		const fadeStart = displayDuration - KEYBOARD_OVERLAY_FADE_MS;
 		return {
 			event,
 			opacity: age <= fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / KEYBOARD_OVERLAY_FADE_MS),

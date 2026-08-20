@@ -34,6 +34,7 @@ final class MouseButtonTracker {
 	struct KeyboardEvent {
 		let timestampMs: Int
 		let keyCode: Int64
+		let isDown: Bool
 		let control: Bool
 		let alt: Bool
 		let shift: Bool
@@ -45,6 +46,7 @@ final class MouseButtonTracker {
 			(1 << CGEventType.leftMouseDown.rawValue) |
 			(1 << CGEventType.leftMouseUp.rawValue) |
 			(1 << CGEventType.keyDown.rawValue) |
+			(1 << CGEventType.keyUp.rawValue) |
 			(1 << CGEventType.flagsChanged.rawValue)
 		guard let tap = CGEvent.tapCreate(
 			tap: .cgSessionEventTap,
@@ -103,11 +105,12 @@ final class MouseButtonTracker {
 			leftDownCount += 1
 		} else if type == .leftMouseUp {
 			leftUpCount += 1
-		} else if type == .keyDown && event.getIntegerValueField(.keyboardEventAutorepeat) == 0 {
+		} else if (type == .keyDown || type == .keyUp) && event.getIntegerValueField(.keyboardEventAutorepeat) == 0 {
 			let flags = event.flags
 			keyboardEvents.append(KeyboardEvent(
 				timestampMs: Int(Date().timeIntervalSince1970 * 1000),
 				keyCode: event.getIntegerValueField(.keyboardEventKeycode),
+				isDown: type == .keyDown,
 				control: flags.contains(.maskControl),
 				alt: flags.contains(.maskAlternate),
 				shift: flags.contains(.maskShift),
@@ -116,18 +119,19 @@ final class MouseButtonTracker {
 		} else if type == .flagsChanged {
 			let flags = event.flags
 			let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-			let isPressed: Bool
+			let isPressed: Bool?
 			switch keyCode {
 			case 56, 60: isPressed = flags.contains(.maskShift)
 			case 59, 62: isPressed = flags.contains(.maskControl)
 			case 58, 61: isPressed = flags.contains(.maskAlternate)
 			case 54, 55: isPressed = flags.contains(.maskCommand)
-			default: isPressed = false
+			default: isPressed = nil
 			}
-			if isPressed {
+			if let isPressed {
 				keyboardEvents.append(KeyboardEvent(
 					timestampMs: Int(Date().timeIntervalSince1970 * 1000),
 					keyCode: keyCode,
+					isDown: isPressed,
 					control: flags.contains(.maskControl),
 					alt: flags.contains(.maskAlternate),
 					shift: flags.contains(.maskShift),
@@ -401,6 +405,7 @@ while true {
 				"type": "key",
 				"timestampMs": keyEvent.timestampMs,
 				"keyCode": keyEvent.keyCode,
+				"down": keyEvent.isDown,
 				"control": keyEvent.control,
 				"alt": keyEvent.alt,
 				"shift": keyEvent.shift,
