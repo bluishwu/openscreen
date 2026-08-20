@@ -1784,7 +1784,7 @@ export function SettingsPanel({
 																	value={[cursorClickBounce]}
 																	onValueChange={(values) => onCursorClickBounceChange?.(values[0])}
 																	min={0}
-																	max={5}
+																	max={10}
 																	step={0.1}
 																	className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
 																/>

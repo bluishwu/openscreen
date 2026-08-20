@@ -23,7 +23,8 @@ export function getCursorClickEffectScale(
 	remainingProgress: number,
 ): number {
 	if (style === "none" || remainingProgress <= 0 || clickBounce <= 0) return 1;
-	const intensity = clamp(clickBounce, 0, 5) / 5;
+	// Keep the previous 0-5 response unchanged while allowing stronger 5-10 effects.
+	const intensity = clamp(clickBounce, 0, 10) / 5;
 	const elapsed = 1 - clamp(remainingProgress, 0, 1);
 	let scale = 1;
 

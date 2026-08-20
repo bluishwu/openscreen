@@ -25,4 +25,10 @@ describe("cursor click effects", () => {
 			getCursorClickEffectScale("elastic", 5, 0.5),
 		);
 	});
+
+	it("allows stronger intensity above the previous maximum", () => {
+		expect(getCursorClickEffectScale("pulse", 10, 0.5)).toBeGreaterThan(
+			getCursorClickEffectScale("pulse", 5, 0.5),
+		);
+	});
 });
