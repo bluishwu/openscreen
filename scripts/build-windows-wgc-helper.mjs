@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -16,6 +16,35 @@ function findVcVarsAll() {
 	const explicit = process.env.VCVARSALL;
 	if (explicit && fs.existsSync(explicit)) {
 		return explicit;
+	}
+
+	const vswhere = path.join(
+		process.env["ProgramFiles(x86)"] ?? "C:\\Program Files (x86)",
+		"Microsoft Visual Studio",
+		"Installer",
+		"vswhere.exe",
+	);
+	if (fs.existsSync(vswhere)) {
+		const result = spawnSync(
+			vswhere,
+			[
+				"-latest",
+				"-products",
+				"*",
+				"-requires",
+				"Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+				"-property",
+				"installationPath",
+			],
+			{ encoding: "utf8", windowsHide: true },
+		);
+		const installationPath = result.stdout?.trim();
+		if (result.status === 0 && installationPath) {
+			const candidate = path.join(installationPath, "VC", "Auxiliary", "Build", "vcvarsall.bat");
+			if (fs.existsSync(candidate)) {
+				return candidate;
+			}
+		}
 	}
 
 	const roots = [
