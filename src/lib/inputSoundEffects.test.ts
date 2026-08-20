@@ -9,10 +9,28 @@ import {
 
 describe("input sound effects", () => {
 	it("provides multiple distinct click and keyboard sounds", () => {
-		expect(CLICK_SOUND_STYLES.length).toBeGreaterThanOrEqual(6);
+		expect(CLICK_SOUND_STYLES.length).toBeGreaterThanOrEqual(12);
 		expect(KEYBOARD_SOUND_STYLES.length).toBeGreaterThanOrEqual(6);
 		expect(sampleInputSound("click", "pop", 0.01)).not.toBe(0);
 		expect(sampleInputSound("keyboard", "thock", 0.01)).not.toBe(0);
+	});
+
+	it("provides distinct natural mouse switch profiles", () => {
+		const profiles = [
+			"mouse-classic",
+			"mouse-crisp",
+			"mouse-gaming",
+			"mouse-silent",
+			"mouse-deep",
+			"mouse-light",
+		] as const;
+		const signatures = profiles.map((style) =>
+			[0.003, 0.008, 0.015, 0.025].map((time) => sampleInputSound("click", style, time)),
+		);
+		expect(new Set(signatures.map((samples) => samples.join(","))).size).toBe(profiles.length);
+		expect(Math.abs(sampleInputSound("click", "mouse-silent", 0.003))).toBeLessThan(
+			Math.abs(sampleInputSound("click", "mouse-crisp", 0.003)),
+		);
 	});
 
 	it("maps source events through trims and speed regions", () => {

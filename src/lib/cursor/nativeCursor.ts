@@ -17,6 +17,7 @@ import upArrowUrl from "@/assets/cursors/Cursor=Up-Arrow.svg";
 import waitUrl from "@/assets/cursors/Cursor=Wait.svg";
 import type { CropRegion } from "@/components/video-editor/types";
 import { getAssetPath } from "@/lib/assetPath";
+import { type CursorClickEffectStyle, getCursorClickEffectScale } from "@/lib/cursor/clickEffects";
 import { DEFAULT_CURSOR_THEME_ID, getCursorTheme } from "@/lib/cursor/cursorThemes";
 import type {
 	CursorRecordingData,
@@ -314,20 +315,12 @@ export function getNativeCursorClickBounceProgress(
 	return 0;
 }
 
-export function getNativeCursorClickBounceScale(clickBounce: number, progress: number) {
-	if (progress <= 0 || clickBounce <= 0) {
-		return 1;
-	}
-
-	const intensity = clamp(clickBounce, 0, 5) / 5;
-	const elapsed = 1 - clamp(progress, 0, 1);
-	if (elapsed < 0.38) {
-		const pressProgress = Math.sin((elapsed / 0.38) * Math.PI);
-		return 1 - pressProgress * intensity * 0.24;
-	}
-
-	const reboundProgress = Math.sin(((elapsed - 0.38) / 0.62) * Math.PI);
-	return 1 + reboundProgress * intensity * 0.16;
+export function getNativeCursorClickBounceScale(
+	clickBounce: number,
+	progress: number,
+	style: CursorClickEffectStyle = "bounce",
+) {
+	return getCursorClickEffectScale(style, clickBounce, progress);
 }
 
 export function getNativeCursorMotionBlurPx({

@@ -150,4 +150,13 @@ describe("getSourceCopyFastPathBlockers", () => {
 			}),
 		).toContain("output-size 1920x1080 differs from source 1920x1032");
 	});
+
+	it("blocks source copy when a cursor click effect is enabled", () => {
+		expect(
+			getSourceCopyFastPathBlockers(createConfig({ cursorClickEffect: "elastic" }), {
+				width: 1920,
+				height: 1080,
+			}),
+		).toContain("cursor click effect is enabled");
+	});
 });

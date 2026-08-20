@@ -206,7 +206,16 @@
 		"size": "大小",
 		"smoothing": "平滑",
 		"motionBlur": "运动模糊",
-		"clickBounce": "点击弹跳",
+		"clickBounce": "效果强度",
+		"clickEffect": "点击效果",
+		"clickEffects": {
+			"none": "关闭",
+			"press": "按压缩小",
+			"bounce": "缩放回弹",
+			"elastic": "弹性回弹",
+			"pulse": "放大脉冲",
+			"double": "双重按压"
+		},
 		"clipToBounds": "裁剪到画布"
 	},
 	"language": {
@@ -252,6 +261,12 @@
 			"volume": "音量",
 			"clickStyles": {
 				"none": "关闭",
+				"mouse-classic": "经典鼠标",
+				"mouse-crisp": "清脆微动",
+				"mouse-gaming": "游戏鼠标",
+				"mouse-silent": "静音鼠标",
+				"mouse-deep": "深沉点击",
+				"mouse-light": "轻盈点击",
 				"soft": "轻触",
 				"pop": "气泡弹出",
 				"mechanical": "机械",

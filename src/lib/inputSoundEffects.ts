@@ -1,7 +1,19 @@
 import { keyboardRecordingEventId } from "@/lib/keyboardEvents";
 import type { KeyboardRecordingEvent } from "@/native/contracts";
 
-export type ClickSoundStyle = "none" | "soft" | "pop" | "mechanical" | "digital" | "bubble";
+export type ClickSoundStyle =
+	| "none"
+	| "mouse-classic"
+	| "mouse-crisp"
+	| "mouse-gaming"
+	| "mouse-silent"
+	| "mouse-deep"
+	| "mouse-light"
+	| "soft"
+	| "pop"
+	| "mechanical"
+	| "digital"
+	| "bubble";
 export type KeyboardSoundStyle =
 	| "none"
 	| "soft"
@@ -13,6 +25,12 @@ export type InputSoundKind = "click" | "keyboard";
 
 export const CLICK_SOUND_STYLES: ClickSoundStyle[] = [
 	"none",
+	"mouse-classic",
+	"mouse-crisp",
+	"mouse-gaming",
+	"mouse-silent",
+	"mouse-deep",
+	"mouse-light",
 	"soft",
 	"pop",
 	"mechanical",
@@ -64,11 +82,59 @@ function noise(elapsedSec: number): number {
 	return Math.sin(elapsedSec * 91_337.17) * Math.sin(elapsedSec * 17_123.41);
 }
 
+function impact(elapsedSec: number, frequency: number, decay: number, brightness: number): number {
+	if (elapsedSec < 0) return 0;
+	const transient = noise(elapsedSec) * Math.exp(-elapsedSec * decay) * brightness;
+	const body =
+		Math.sin(elapsedSec * Math.PI * 2 * frequency) * Math.exp(-elapsedSec * decay * 0.46);
+	const harmonic =
+		Math.sin(elapsedSec * Math.PI * 2 * frequency * 2.73) * Math.exp(-elapsedSec * decay * 0.78);
+	return transient + body * 0.55 + harmonic * 0.2;
+}
+
+function naturalMouseClick(style: ClickSoundStyle, elapsedSec: number): number | null {
+	switch (style) {
+		case "mouse-classic":
+			return (
+				impact(elapsedSec, 720, 120, 0.52) * 0.62 +
+				impact(elapsedSec - 0.012, 560, 150, 0.32) * 0.34
+			);
+		case "mouse-crisp":
+			return (
+				impact(elapsedSec, 1_650, 190, 0.72) * 0.62 +
+				impact(elapsedSec - 0.009, 1_150, 230, 0.42) * 0.28
+			);
+		case "mouse-gaming":
+			return (
+				impact(elapsedSec, 1_080, 180, 0.65) * 0.68 +
+				impact(elapsedSec - 0.007, 820, 250, 0.28) * 0.24
+			);
+		case "mouse-silent":
+			return (
+				impact(elapsedSec, 390, 155, 0.13) * 0.42 +
+				impact(elapsedSec - 0.014, 310, 190, 0.08) * 0.18
+			);
+		case "mouse-deep":
+			return (
+				impact(elapsedSec, 240, 82, 0.3) * 0.68 + impact(elapsedSec - 0.016, 190, 115, 0.2) * 0.3
+			);
+		case "mouse-light":
+			return (
+				impact(elapsedSec, 1_320, 235, 0.46) * 0.48 +
+				impact(elapsedSec - 0.006, 980, 280, 0.2) * 0.18
+			);
+		default:
+			return null;
+	}
+}
+
 export function getInputSoundDuration(
 	kind: InputSoundKind,
 	style: ClickSoundStyle | KeyboardSoundStyle,
 ): number {
 	if (style === "none") return 0;
+	if (style === "mouse-deep") return 0.075;
+	if (style.startsWith("mouse-")) return 0.052;
 	if (style === "bubble") return 0.13;
 	if (style === "typewriter") return 0.11;
 	if (style === "mechanical") return kind === "keyboard" ? 0.085 : 0.075;
@@ -84,6 +150,10 @@ export function sampleInputSound(
 	const duration = getInputSoundDuration(kind, style);
 	const env = envelope(elapsedSec, duration);
 	if (env === 0) return 0;
+	if (kind === "click") {
+		const mouseClick = naturalMouseClick(style as ClickSoundStyle, elapsedSec);
+		if (mouseClick !== null) return mouseClick;
+	}
 
 	switch (style) {
 		case "soft":
@@ -134,6 +204,19 @@ export function playInputSound(
 	source.connect(destination);
 	source.start();
 	source.addEventListener("ended", () => source.disconnect(), { once: true });
+}
+
+let previewAudioContext: AudioContext | null = null;
+
+export function previewInputSound(
+	kind: InputSoundKind,
+	style: ClickSoundStyle | KeyboardSoundStyle,
+	volume: number,
+): void {
+	if (typeof window === "undefined" || style === "none") return;
+	previewAudioContext ??= new AudioContext();
+	if (previewAudioContext.state === "suspended") void previewAudioContext.resume();
+	playInputSound(previewAudioContext, kind, style, volume);
 }
 
 export function mapSourceTimeToOutputTime(

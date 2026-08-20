@@ -1,5 +1,6 @@
 import { Assets, BlurFilter, Container, Graphics, Sprite, Texture } from "pixi.js";
 import { MotionBlurFilter } from "pixi-filters/motion-blur";
+import { type CursorClickEffectStyle, getCursorClickEffectScale } from "@/lib/cursor/clickEffects";
 import type { CursorTelemetryPoint } from "../types";
 import {
 	createSpringState,
@@ -53,6 +54,8 @@ export interface CursorRenderConfig {
 	motionBlur: number;
 	/** Click bounce multiplier. */
 	clickBounce: number;
+	/** Visual feedback rendered at each click. */
+	clickEffect: CursorClickEffectStyle;
 }
 
 export const DEFAULT_CURSOR_CONFIG: CursorRenderConfig = {
@@ -63,11 +66,12 @@ export const DEFAULT_CURSOR_CONFIG: CursorRenderConfig = {
 	smoothingFactor: 0.18,
 	motionBlur: 0,
 	clickBounce: 1,
+	clickEffect: "bounce",
 };
 
 const REFERENCE_WIDTH = 1920;
 const MIN_CURSOR_VIEWPORT_SCALE = 0.55;
-const CLICK_ANIMATION_MS = 140;
+const CLICK_ANIMATION_MS = 260;
 const CLICK_RING_FADE_MS = 240;
 const CURSOR_MOTION_BLUR_BASE_MULTIPLIER = 0.08;
 const CURSOR_TIME_DISCONTINUITY_MS = 100;
@@ -577,6 +581,10 @@ export class PixiCursorOverlay {
 		this.config.clickBounce = Math.max(0, clickBounce);
 	}
 
+	setClickEffect(clickEffect: CursorClickEffectStyle) {
+		this.config.clickEffect = clickEffect;
+	}
+
 	update(
 		samples: CursorTelemetryPoint[],
 		timeMs: number,
@@ -624,9 +632,10 @@ export class PixiCursorOverlay {
 		const asset = getCursorAsset(spriteKey);
 		const shadowSprite = this.cursorShadowSprites[spriteKey] ?? this.cursorShadowSprites.arrow!;
 		const sprite = this.cursorSprites[spriteKey] ?? this.cursorSprites.arrow!;
-		const bounceScale = Math.max(
-			0.72,
-			1 - Math.sin(clickBounceProgress * Math.PI) * (0.08 * this.config.clickBounce),
+		const bounceScale = getCursorClickEffectScale(
+			this.config.clickEffect,
+			this.config.clickBounce,
+			clickBounceProgress,
 		);
 		const scaledH = h;
 
@@ -746,9 +755,10 @@ export function drawCursorOnCanvas(
 		cursorType && loadedCursorAssets[cursorType] ? cursorType : "arrow"
 	) as CursorAssetKey;
 	const asset = getCursorAsset(spriteKey);
-	const bounceScale = Math.max(
-		0.72,
-		1 - Math.sin(clickBounceProgress * Math.PI) * (0.08 * config.clickBounce),
+	const bounceScale = getCursorClickEffectScale(
+		config.clickEffect,
+		config.clickBounce,
+		clickBounceProgress,
 	);
 
 	ctx.save();

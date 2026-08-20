@@ -34,6 +34,7 @@ import {
 	transcribeMono16kToSegments,
 	trimLeadingSilenceMono16k,
 } from "@/lib/captioning";
+import type { CursorClickEffectStyle } from "@/lib/cursor/clickEffects";
 import { hasNativeCursorRecordingData } from "@/lib/cursor/nativeCursor";
 import {
 	calculateEffectiveSourceDimensions,
@@ -298,6 +299,9 @@ export default function VideoEditor() {
 	const [cursorSmoothing, setCursorSmoothing] = useState(DEFAULT_CURSOR_SETTINGS.smoothing);
 	const [cursorMotionBlur, setCursorMotionBlur] = useState(DEFAULT_CURSOR_SETTINGS.motionBlur);
 	const [cursorClickBounce, setCursorClickBounce] = useState(DEFAULT_CURSOR_SETTINGS.clickBounce);
+	const [cursorClickEffect, setCursorClickEffect] = useState<CursorClickEffectStyle>(
+		DEFAULT_CURSOR_SETTINGS.clickEffect,
+	);
 	const [cursorClipToBounds, setCursorClipToBounds] = useState(
 		DEFAULT_CURSOR_SETTINGS.clipToBounds,
 	);
@@ -931,6 +935,7 @@ export default function VideoEditor() {
 		setCursorSmoothing(DEFAULT_CURSOR_SETTINGS.smoothing);
 		setCursorMotionBlur(DEFAULT_CURSOR_SETTINGS.motionBlur);
 		setCursorClickBounce(DEFAULT_CURSOR_SETTINGS.clickBounce);
+		setCursorClickEffect(DEFAULT_CURSOR_SETTINGS.clickEffect);
 		setCursorClipToBounds(DEFAULT_CURSOR_SETTINGS.clipToBounds);
 		setCursorTheme(DEFAULT_CURSOR_SETTINGS.theme);
 		// Reset region ID counters.
@@ -1978,6 +1983,7 @@ export default function VideoEditor() {
 						cursorSmoothing,
 						cursorMotionBlur,
 						cursorClickBounce,
+						cursorClickEffect,
 						cursorClipToBounds,
 						cursorTheme,
 						annotationRegions,
@@ -2081,6 +2087,7 @@ export default function VideoEditor() {
 						cursorSmoothing,
 						cursorMotionBlur,
 						cursorClickBounce,
+						cursorClickEffect,
 						cursorClipToBounds,
 						cursorTheme,
 						annotationRegions,
@@ -2226,6 +2233,7 @@ export default function VideoEditor() {
 			cursorSmoothing,
 			cursorMotionBlur,
 			cursorClickBounce,
+			cursorClickEffect,
 			cursorClipToBounds,
 			cursorTheme,
 			t,
@@ -2746,6 +2754,7 @@ export default function VideoEditor() {
 													cursorSmoothing={cursorSmoothing}
 													cursorMotionBlur={cursorMotionBlur}
 													cursorClickBounce={cursorClickBounce}
+													cursorClickEffect={cursorClickEffect}
 													cursorClipToBounds={cursorClipToBounds}
 													cursorTheme={cursorTheme}
 													showKeyboardOverlay={showKeyboardOverlay}
@@ -2946,6 +2955,8 @@ export default function VideoEditor() {
 										onCursorMotionBlurChange={setCursorMotionBlur}
 										cursorClickBounce={cursorClickBounce}
 										onCursorClickBounceChange={setCursorClickBounce}
+										cursorClickEffect={cursorClickEffect}
+										onCursorClickEffectChange={setCursorClickEffect}
 										cursorClipToBounds={cursorClipToBounds}
 										onCursorClipToBoundsChange={setCursorClipToBounds}
 										cursorTheme={cursorTheme}

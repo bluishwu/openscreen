@@ -7,6 +7,7 @@ import type {
 	WebcamSizePreset,
 	ZoomRegion,
 } from "@/components/video-editor/types";
+import type { CursorClickEffectStyle } from "@/lib/cursor/clickEffects";
 import type {
 	ClickSoundStyle,
 	InputSoundEffectsConfig,
@@ -52,6 +53,7 @@ export interface VideoExporterConfig extends ExportConfig {
 	cursorSmoothing?: number;
 	cursorMotionBlur?: number;
 	cursorClickBounce?: number;
+	cursorClickEffect?: CursorClickEffectStyle;
 	cursorClipToBounds?: boolean;
 	cursorTheme?: string;
 	annotationRegions?: AnnotationRegion[];
@@ -143,6 +145,9 @@ export function getSourceCopyFastPathBlockers(
 		(config.keyboardSoundStyle ?? "none") !== "none"
 	) {
 		blockers.push("input sound effects are enabled");
+	}
+	if ((config.cursorClickEffect ?? "none") !== "none") {
+		blockers.push("cursor click effect is enabled");
 	}
 	if (!isDefaultCrop(config.cropRegion)) blockers.push("crop is not default");
 	if ((config.padding ?? 0) > SOURCE_COPY_EPSILON) blockers.push("padding is not zero");
@@ -279,6 +284,7 @@ export class VideoExporter {
 				cursorSmoothing: this.config.cursorSmoothing,
 				cursorMotionBlur: this.config.cursorMotionBlur,
 				cursorClickBounce: this.config.cursorClickBounce,
+				cursorClickEffect: this.config.cursorClickEffect,
 				cursorClipToBounds: this.config.cursorClipToBounds,
 				cursorTheme: this.config.cursorTheme,
 				videoWidth: videoInfo.width,

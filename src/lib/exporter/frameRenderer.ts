@@ -49,6 +49,7 @@ import {
 	type Size,
 	type StyledRenderRect,
 } from "@/lib/compositeLayout";
+import type { CursorClickEffectStyle } from "@/lib/cursor/clickEffects";
 import { getSmoothedCursorPath } from "@/lib/cursor/cursorPathSmoothing";
 import {
 	createNativeCursorMotionBlurState,
@@ -91,6 +92,7 @@ interface FrameRenderConfig {
 	cursorSmoothing?: number;
 	cursorMotionBlur?: number;
 	cursorClickBounce?: number;
+	cursorClickEffect?: CursorClickEffectStyle;
 	cursorClipToBounds?: boolean;
 	cursorTheme?: string;
 	videoWidth: number;
@@ -631,6 +633,7 @@ export class FrameRenderer {
 			getNativeCursorClickBounceScale(
 				this.config.cursorClickBounce ?? 0,
 				getNativeCursorClickBounceProgress(this.config.cursorRecordingData, timeMs),
+				this.config.cursorClickEffect ?? "bounce",
 			);
 		const appliedScale = this.animationState.appliedScale;
 		// Normalize cursor size to the same fraction of video width as the preview;

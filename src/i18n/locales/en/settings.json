@@ -216,7 +216,16 @@
 		"size": "Size",
 		"smoothing": "Smoothing",
 		"motionBlur": "Motion Blur",
-		"clickBounce": "Click Bounce",
+		"clickBounce": "Effect intensity",
+		"clickEffect": "Click effect",
+		"clickEffects": {
+			"none": "Off",
+			"press": "Press",
+			"bounce": "Bounce",
+			"elastic": "Elastic",
+			"pulse": "Grow pulse",
+			"double": "Double press"
+		},
 		"clipToBounds": "Clip to Canvas",
 		"clipToBoundsDescription": "Keeps the cursor inside the video frame. Turn off to let the cursor extend past the edges - useful when zoomed in or panned."
 	},
@@ -263,6 +272,12 @@
 			"volume": "Volume",
 			"clickStyles": {
 				"none": "Off",
+				"mouse-classic": "Classic mouse",
+				"mouse-crisp": "Crisp switch",
+				"mouse-gaming": "Gaming mouse",
+				"mouse-silent": "Silent mouse",
+				"mouse-deep": "Deep click",
+				"mouse-light": "Light click",
 				"soft": "Soft tap",
 				"pop": "Pop",
 				"mechanical": "Mechanical",

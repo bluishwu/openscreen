@@ -197,6 +197,7 @@ export interface CursorVisualSettings {
 	smoothing: number;
 	motionBlur: number;
 	clickBounce: number;
+	clickEffect: import("@/lib/cursor/clickEffects").CursorClickEffectStyle;
 	clipToBounds: boolean;
 }
 

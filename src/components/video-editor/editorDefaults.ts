@@ -80,6 +80,7 @@ export const DEFAULT_CURSOR_SETTINGS: CursorVisualSettings & { show: boolean; th
 	smoothing: DEFAULT_CURSOR_SMOOTHING,
 	motionBlur: DEFAULT_CURSOR_MOTION_BLUR,
 	clickBounce: DEFAULT_CURSOR_CLICK_BOUNCE,
+	clickEffect: "bounce",
 	clipToBounds: DEFAULT_CURSOR_CLIP_TO_BOUNDS,
 	theme: DEFAULT_CURSOR_THEME_ID,
 };

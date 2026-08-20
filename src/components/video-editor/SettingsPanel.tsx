@@ -45,6 +45,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useScopedT } from "@/contexts/I18nContext";
 import { getAssetPath } from "@/lib/assetPath";
 import { WEBCAM_LAYOUT_PRESETS } from "@/lib/compositeLayout";
+import { CURSOR_CLICK_EFFECT_STYLES, type CursorClickEffectStyle } from "@/lib/cursor/clickEffects";
 import { CURSOR_THEMES, DEFAULT_CURSOR_THEME_ID } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
 import {
@@ -57,6 +58,7 @@ import {
 	type ClickSoundStyle,
 	KEYBOARD_SOUND_STYLES,
 	type KeyboardSoundStyle,
+	previewInputSound,
 } from "@/lib/inputSoundEffects";
 import {
 	KEYBOARD_OVERLAY_ANIMATIONS,
@@ -357,6 +359,8 @@ interface SettingsPanelProps {
 	onCursorMotionBlurChange?: (blur: number) => void;
 	cursorClickBounce?: number;
 	onCursorClickBounceChange?: (bounce: number) => void;
+	cursorClickEffect?: CursorClickEffectStyle;
+	onCursorClickEffectChange?: (effect: CursorClickEffectStyle) => void;
 	cursorClipToBounds?: boolean;
 	onCursorClipToBoundsChange?: (clip: boolean) => void;
 	cursorTheme?: string;
@@ -540,6 +544,8 @@ export function SettingsPanel({
 	onCursorMotionBlurChange,
 	cursorClickBounce = DEFAULT_CURSOR_SETTINGS.clickBounce,
 	onCursorClickBounceChange,
+	cursorClickEffect = DEFAULT_CURSOR_SETTINGS.clickEffect,
+	onCursorClickEffectChange,
 	cursorClipToBounds = DEFAULT_CURSOR_SETTINGS.clipToBounds,
 	onCursorClipToBoundsChange,
 	cursorTheme = DEFAULT_CURSOR_SETTINGS.theme,
@@ -1783,6 +1789,28 @@ export function SettingsPanel({
 																	className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
 																/>
 															</div>
+															<div className="p-2 rounded-lg bg-white/5 border border-white/5">
+																<div className="mb-1 text-[10px] font-medium text-slate-300">
+																	{t("cursor.clickEffect")}
+																</div>
+																<Select
+																	value={cursorClickEffect}
+																	onValueChange={(value) =>
+																		onCursorClickEffectChange?.(value as CursorClickEffectStyle)
+																	}
+																>
+																	<SelectTrigger className="h-8 border-white/[0.08] bg-white/[0.04] text-[9px]">
+																		<SelectValue />
+																	</SelectTrigger>
+																	<SelectContent>
+																		{CURSOR_CLICK_EFFECT_STYLES.map((effect) => (
+																			<SelectItem key={effect} value={effect}>
+																				{t(`cursor.clickEffects.${effect}`)}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+															</div>
 														</div>
 													</>
 												)}
@@ -1865,9 +1893,11 @@ export function SettingsPanel({
 																</div>
 																<Select
 																	value={clickSoundStyle}
-																	onValueChange={(value) =>
-																		onClickSoundStyleChange?.(value as ClickSoundStyle)
-																	}
+																	onValueChange={(value) => {
+																		const style = value as ClickSoundStyle;
+																		onClickSoundStyleChange?.(style);
+																		previewInputSound("click", style, inputSoundVolume);
+																	}}
 																>
 																	<SelectTrigger className="h-8 border-white/[0.08] bg-white/[0.04] text-[9px]">
 																		<SelectValue />

@@ -26,6 +26,7 @@ import {
 	type WebcamLayoutPreset,
 	type WebcamSizePreset,
 } from "@/lib/compositeLayout";
+import type { CursorClickEffectStyle } from "@/lib/cursor/clickEffects";
 import { getSmoothedCursorPath } from "@/lib/cursor/cursorPathSmoothing";
 import {
 	createNativeCursorMotionBlurState,
@@ -155,6 +156,7 @@ interface VideoPlaybackProps {
 	cursorSmoothing?: number;
 	cursorMotionBlur?: number;
 	cursorClickBounce?: number;
+	cursorClickEffect?: CursorClickEffectStyle;
 	cursorClipToBounds?: boolean;
 	cursorTheme?: string;
 	showKeyboardOverlay?: boolean;
@@ -295,6 +297,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			cursorSmoothing = DEFAULT_CURSOR_SETTINGS.smoothing,
 			cursorMotionBlur = DEFAULT_CURSOR_SETTINGS.motionBlur,
 			cursorClickBounce = DEFAULT_CURSOR_SETTINGS.clickBounce,
+			cursorClickEffect = DEFAULT_CURSOR_SETTINGS.clickEffect,
 			cursorClipToBounds = DEFAULT_CURSOR_SETTINGS.clipToBounds,
 			cursorTheme = DEFAULT_CURSOR_SETTINGS.theme,
 			showKeyboardOverlay = true,
@@ -390,6 +393,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		const cursorSmoothingRef = useRef(cursorSmoothing);
 		const cursorMotionBlurRef = useRef(cursorMotionBlur);
 		const cursorClickBounceRef = useRef(cursorClickBounce);
+		const cursorClickEffectRef = useRef(cursorClickEffect);
 		const cursorClipToBoundsRef = useRef(cursorClipToBounds);
 		const cursorThemeRef = useRef(cursorTheme);
 		const isPreviewingZoomRef = useRef(isPreviewingZoom);
@@ -930,6 +934,10 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 		}, [cursorClickBounce]);
 
 		useEffect(() => {
+			cursorClickEffectRef.current = cursorClickEffect;
+		}, [cursorClickEffect]);
+
+		useEffect(() => {
 			cursorClipToBoundsRef.current = cursorClipToBounds;
 		}, [cursorClipToBounds]);
 
@@ -963,8 +971,9 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			overlay.setSmoothingFactor(cursorSmoothing);
 			overlay.setMotionBlur(cursorMotionBlur);
 			overlay.setClickBounce(cursorClickBounce);
+			overlay.setClickEffect(cursorClickEffect);
 			overlay.reset();
-		}, [cursorSize, cursorSmoothing, cursorMotionBlur, cursorClickBounce]);
+		}, [cursorSize, cursorSmoothing, cursorMotionBlur, cursorClickBounce, cursorClickEffect]);
 
 		useEffect(() => {
 			onTimeUpdateRef.current = onTimeUpdate;
@@ -1133,6 +1142,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 						smoothingFactor: cursorSmoothingRef.current,
 						motionBlur: cursorMotionBlurRef.current,
 						clickBounce: cursorClickBounceRef.current,
+						clickEffect: cursorClickEffectRef.current,
 					});
 					cursorOverlayRef.current = cursorOverlay;
 				}
@@ -1703,7 +1713,11 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 								);
 								const scale =
 									Math.max(0, cursorSizeRef.current) *
-									getNativeCursorClickBounceScale(cursorClickBounceRef.current, bounceProgress);
+									getNativeCursorClickBounceScale(
+										cursorClickBounceRef.current,
+										bounceProgress,
+										cursorClickEffectRef.current,
+									);
 								// Normalize cursor size to the displayed video width so the cursor
 								// appears at the same fraction of the video in both preview and export.
 								const crop = cropRegionRef.current ?? { x: 0, y: 0, width: 1, height: 1 };
