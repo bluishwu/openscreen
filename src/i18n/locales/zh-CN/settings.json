@@ -218,10 +218,29 @@
 		"singleKeys": "显示单键按下",
 		"size": "标签大小",
 		"style": "样式",
+		"animation": "出现动画",
 		"position": "摆放位置",
 		"opacity": "背景透明度",
 		"edgeOffset": "边缘距离",
-		"styles": { "glass": "玻璃", "dark": "深色", "light": "浅色", "minimal": "极简" },
+		"styles": {
+			"glass": "玻璃",
+			"dark": "深色",
+			"light": "浅色",
+			"minimal": "极简",
+			"neon": "霓虹",
+			"pastel": "柔彩",
+			"retro": "复古",
+			"terminal": "终端",
+			"outline": "描边",
+			"gradient": "渐变"
+		},
+		"animations": {
+			"none": "无",
+			"fade": "淡入",
+			"scale": "弹出",
+			"slide": "上滑",
+			"bounce": "弹跳"
+		},
 		"positions": {
 			"top-left": "左上",
 			"top-center": "顶部居中",

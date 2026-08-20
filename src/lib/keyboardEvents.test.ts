@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	getActiveKeyboardOverlay,
+	getKeyboardOverlayMotion,
 	keyboardCodeFromMacKeyCode,
 	keyboardCodeFromWindowsVirtualKey,
 	keyboardEventLabels,
@@ -56,5 +57,17 @@ describe("keyboard overlay selection", () => {
 	it("skips events disabled from the keyboard timeline", () => {
 		const disabledId = keyboardRecordingEventId(events[1], 1);
 		expect(getActiveKeyboardOverlay(events, 700, false, [disabledId])).toBeNull();
+	});
+
+	it("calculates distinct entrance motion presets", () => {
+		const active = getActiveKeyboardOverlay(events, 550, false);
+		expect(active).not.toBeNull();
+		if (!active) return;
+
+		expect(getKeyboardOverlayMotion(active, "none")).toMatchObject({ scale: 1, translateY: 0 });
+		expect(getKeyboardOverlayMotion(active, "fade").opacity).toBeLessThan(active.opacity);
+		expect(getKeyboardOverlayMotion(active, "scale").scale).toBeLessThan(1);
+		expect(getKeyboardOverlayMotion(active, "slide").translateY).toBeGreaterThan(0);
+		expect(getKeyboardOverlayMotion(active, "bounce").scale).toBeGreaterThan(0);
 	});
 });

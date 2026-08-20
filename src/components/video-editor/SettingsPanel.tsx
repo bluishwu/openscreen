@@ -53,7 +53,10 @@ import {
 	GIF_SIZE_PRESETS,
 } from "@/lib/exporter";
 import {
+	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
+	KEYBOARD_OVERLAY_STYLES,
+	type KeyboardOverlayAnimation,
 	type KeyboardOverlayPosition,
 	type KeyboardOverlayStyle,
 } from "@/lib/keyboardEvents";
@@ -364,6 +367,8 @@ interface SettingsPanelProps {
 	onKeyboardOverlaySizeCommit?: () => void;
 	keyboardOverlayStyle?: KeyboardOverlayStyle;
 	onKeyboardOverlayStyleChange?: (style: KeyboardOverlayStyle) => void;
+	keyboardOverlayAnimation?: KeyboardOverlayAnimation;
+	onKeyboardOverlayAnimationChange?: (animation: KeyboardOverlayAnimation) => void;
 	keyboardOverlayPosition?: KeyboardOverlayPosition;
 	onKeyboardOverlayPositionChange?: (position: KeyboardOverlayPosition) => void;
 	keyboardOverlayOpacity?: number;
@@ -383,6 +388,20 @@ const ZOOM_DEPTH_OPTIONS: Array<{ depth: ZoomDepth; label: string }> = [
 	{ depth: 5, label: "3.5×" },
 	{ depth: 6, label: "5×" },
 ];
+
+const KEYBOARD_STYLE_SWATCH_CLASSES: Record<KeyboardOverlayStyle, string> = {
+	glass: "border-white/25 bg-white/10 text-white backdrop-blur",
+	dark: "border-white/15 bg-black text-white shadow-[0_2px_0_#000]",
+	light: "border-slate-300 bg-white text-slate-800",
+	minimal: "border-white/20 bg-transparent text-white",
+	neon: "border-cyan-400 bg-slate-950 text-cyan-300 shadow-[0_0_8px_#22d3ee]",
+	pastel:
+		"border-pink-100 bg-gradient-to-br from-pink-200 via-violet-200 to-sky-200 text-violet-950",
+	retro: "border-amber-100 bg-amber-300 font-serif text-amber-950 shadow-[0_2px_0_#a56832]",
+	terminal: "rounded-none border-green-500 bg-black font-mono text-green-400",
+	outline: "border-white bg-transparent text-white shadow-[0_0_5px_#000]",
+	gradient: "border-white/30 bg-gradient-to-br from-violet-600 to-blue-600 text-white",
+};
 
 type SettingsPanelMode =
 	| "background"
@@ -524,6 +543,8 @@ export function SettingsPanel({
 	onKeyboardOverlaySizeCommit,
 	keyboardOverlayStyle = "glass",
 	onKeyboardOverlayStyleChange,
+	keyboardOverlayAnimation = "scale",
+	onKeyboardOverlayAnimationChange,
 	keyboardOverlayPosition = "bottom-center",
 	onKeyboardOverlayPositionChange,
 	keyboardOverlayOpacity = 0.86,
@@ -1788,7 +1809,7 @@ export function SettingsPanel({
 															{t("keyboard.style")}
 														</div>
 														<div className="grid grid-cols-2 gap-1.5">
-															{(["glass", "dark", "light", "minimal"] as const).map((style) => (
+															{KEYBOARD_OVERLAY_STYLES.map((style) => (
 																<button
 																	type="button"
 																	key={style}
@@ -1803,16 +1824,34 @@ export function SettingsPanel({
 																	<span
 																		className={cn(
 																			"flex h-5 w-7 items-center justify-center rounded border text-[8px] font-bold",
-																			style === "light"
-																				? "border-slate-300 bg-white text-slate-800"
-																				: style === "minimal"
-																					? "border-white/20 bg-transparent text-white"
-																					: "border-white/15 bg-black/70 text-white",
+																			KEYBOARD_STYLE_SWATCH_CLASSES[style],
 																		)}
 																	>
 																		⌘K
 																	</span>
 																	{t(`keyboard.styles.${style}`)}
+																</button>
+															))}
+														</div>
+													</div>
+													<div className="space-y-1.5">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.animation")}
+														</div>
+														<div className="grid grid-cols-3 gap-1.5">
+															{KEYBOARD_OVERLAY_ANIMATIONS.map((animation) => (
+																<button
+																	type="button"
+																	key={animation}
+																	onClick={() => onKeyboardOverlayAnimationChange?.(animation)}
+																	className={cn(
+																		"h-8 rounded-md border px-1.5 text-[9px] font-medium transition-all",
+																		keyboardOverlayAnimation === animation
+																			? "border-[#34B27B]/60 bg-[#34B27B]/10 text-white"
+																			: "border-white/[0.07] bg-white/[0.035] text-slate-400 hover:bg-white/[0.07]",
+																	)}
+																>
+																	{t(`keyboard.animations.${animation}`)}
 																</button>
 															))}
 														</div>

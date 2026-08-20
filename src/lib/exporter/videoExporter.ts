@@ -58,6 +58,7 @@ export interface VideoExporterConfig extends ExportConfig {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardOverlayAnimation?: import("@/lib/keyboardEvents").KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
 	keyboardOverlayOffset?: number;
@@ -285,6 +286,7 @@ export class VideoExporter {
 				showSingleKeyPresses: this.config.showSingleKeyPresses,
 				keyboardOverlaySize: this.config.keyboardOverlaySize,
 				keyboardOverlayStyle: this.config.keyboardOverlayStyle,
+				keyboardOverlayAnimation: this.config.keyboardOverlayAnimation,
 				keyboardOverlayPosition: this.config.keyboardOverlayPosition,
 				keyboardOverlayOpacity: this.config.keyboardOverlayOpacity,
 				keyboardOverlayOffset: this.config.keyboardOverlayOffset,

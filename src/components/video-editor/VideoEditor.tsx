@@ -213,6 +213,7 @@ export default function VideoEditor() {
 		showSingleKeyPresses,
 		keyboardOverlaySize,
 		keyboardOverlayStyle,
+		keyboardOverlayAnimation,
 		keyboardOverlayPosition,
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
@@ -432,6 +433,7 @@ export default function VideoEditor() {
 				showSingleKeyPresses: normalizedEditor.showSingleKeyPresses,
 				keyboardOverlaySize: normalizedEditor.keyboardOverlaySize,
 				keyboardOverlayStyle: normalizedEditor.keyboardOverlayStyle,
+				keyboardOverlayAnimation: normalizedEditor.keyboardOverlayAnimation,
 				keyboardOverlayPosition: normalizedEditor.keyboardOverlayPosition,
 				keyboardOverlayOpacity: normalizedEditor.keyboardOverlayOpacity,
 				keyboardOverlayOffset: normalizedEditor.keyboardOverlayOffset,
@@ -517,6 +519,7 @@ export default function VideoEditor() {
 			showSingleKeyPresses,
 			keyboardOverlaySize,
 			keyboardOverlayStyle,
+			keyboardOverlayAnimation,
 			keyboardOverlayPosition,
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
@@ -556,6 +559,7 @@ export default function VideoEditor() {
 		showSingleKeyPresses,
 		keyboardOverlaySize,
 		keyboardOverlayStyle,
+		keyboardOverlayAnimation,
 		keyboardOverlayPosition,
 		keyboardOverlayOpacity,
 		keyboardOverlayOffset,
@@ -692,6 +696,7 @@ export default function VideoEditor() {
 				showSingleKeyPresses,
 				keyboardOverlaySize,
 				keyboardOverlayStyle,
+				keyboardOverlayAnimation,
 				keyboardOverlayPosition,
 				keyboardOverlayOpacity,
 				keyboardOverlayOffset,
@@ -765,6 +770,7 @@ export default function VideoEditor() {
 			showSingleKeyPresses,
 			keyboardOverlaySize,
 			keyboardOverlayStyle,
+			keyboardOverlayAnimation,
 			keyboardOverlayPosition,
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
@@ -1971,6 +1977,7 @@ export default function VideoEditor() {
 						showSingleKeyPresses,
 						keyboardOverlaySize,
 						keyboardOverlayStyle,
+						keyboardOverlayAnimation,
 						keyboardOverlayPosition,
 						keyboardOverlayOpacity,
 						keyboardOverlayOffset,
@@ -2073,6 +2080,7 @@ export default function VideoEditor() {
 						showSingleKeyPresses,
 						keyboardOverlaySize,
 						keyboardOverlayStyle,
+						keyboardOverlayAnimation,
 						keyboardOverlayPosition,
 						keyboardOverlayOpacity,
 						keyboardOverlayOffset,
@@ -2184,6 +2192,7 @@ export default function VideoEditor() {
 			showSingleKeyPresses,
 			keyboardOverlaySize,
 			keyboardOverlayStyle,
+			keyboardOverlayAnimation,
 			keyboardOverlayPosition,
 			keyboardOverlayOpacity,
 			keyboardOverlayOffset,
@@ -2719,6 +2728,7 @@ export default function VideoEditor() {
 													showSingleKeyPresses={showSingleKeyPresses}
 													keyboardOverlaySize={keyboardOverlaySize}
 													keyboardOverlayStyle={keyboardOverlayStyle}
+													keyboardOverlayAnimation={keyboardOverlayAnimation}
 													keyboardOverlayPosition={keyboardOverlayPosition}
 													keyboardOverlayOpacity={keyboardOverlayOpacity}
 													keyboardOverlayOffset={keyboardOverlayOffset}
@@ -2933,6 +2943,10 @@ export default function VideoEditor() {
 										keyboardOverlayStyle={keyboardOverlayStyle}
 										onKeyboardOverlayStyleChange={(style) =>
 											pushState({ keyboardOverlayStyle: style })
+										}
+										keyboardOverlayAnimation={keyboardOverlayAnimation}
+										onKeyboardOverlayAnimationChange={(animation) =>
+											pushState({ keyboardOverlayAnimation: animation })
 										}
 										keyboardOverlayPosition={keyboardOverlayPosition}
 										onKeyboardOverlayPositionChange={(position) =>

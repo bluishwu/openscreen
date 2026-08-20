@@ -24,6 +24,13 @@ import type {
 
 const GIF_WORKER_URL = new URL("gif.js/dist/gif.worker.js", import.meta.url).toString();
 
+export function getGifFrameDelayMs(frameRate: GifFrameRate, frameIndex: number): number {
+	// GIF stores delays in 10 ms units. Alternating 20/10/20 ms is the closest
+	// representable cadence whose three-frame average is exactly 60 FPS.
+	if (frameRate === 60) return frameIndex % 3 === 1 ? 10 : 20;
+	return Math.round(1000 / frameRate);
+}
+
 interface GifExporterConfig {
 	videoUrl: string;
 	webcamVideoUrl?: string;
@@ -66,6 +73,7 @@ interface GifExporterConfig {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardOverlayAnimation?: import("@/lib/keyboardEvents").KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
 	keyboardOverlayOffset?: number;
@@ -192,6 +200,7 @@ export class GifExporter {
 				showSingleKeyPresses: this.config.showSingleKeyPresses,
 				keyboardOverlaySize: this.config.keyboardOverlaySize,
 				keyboardOverlayStyle: this.config.keyboardOverlayStyle,
+				keyboardOverlayAnimation: this.config.keyboardOverlayAnimation,
 				keyboardOverlayPosition: this.config.keyboardOverlayPosition,
 				keyboardOverlayOpacity: this.config.keyboardOverlayOpacity,
 				keyboardOverlayOffset: this.config.keyboardOverlayOffset,
@@ -224,7 +233,7 @@ export class GifExporter {
 			);
 
 			// gif.js wants frame delay in ms
-			const frameDelay = Math.round(1000 / this.config.frameRate);
+			const frameDelay = getGifFrameDelayMs(this.config.frameRate, 0);
 
 			console.log("[GifExporter] Original duration:", videoInfo.duration, "s");
 			console.log("[GifExporter] Effective duration:", effectiveDuration, "s");
@@ -298,7 +307,10 @@ export class GifExporter {
 
 						const canvas = renderer.getCanvas();
 
-						this.gif!.addFrame(canvas, { delay: frameDelay, copy: true });
+						this.gif!.addFrame(canvas, {
+							delay: getGifFrameDelayMs(this.config.frameRate, frameIndex),
+							copy: true,
+						});
 
 						frameIndex++;
 

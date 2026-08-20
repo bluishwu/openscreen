@@ -3,8 +3,10 @@ import { normalizeBlurColor, normalizeBlurType } from "@/lib/blurEffects";
 import { normalizeCursorThemeId } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
 import {
+	KEYBOARD_OVERLAY_ANIMATIONS,
 	KEYBOARD_OVERLAY_POSITIONS,
 	KEYBOARD_OVERLAY_STYLES,
+	type KeyboardOverlayAnimation,
 	type KeyboardOverlayPosition,
 	type KeyboardOverlayStyle,
 } from "@/lib/keyboardEvents";
@@ -103,6 +105,7 @@ export interface ProjectEditorState {
 	showSingleKeyPresses: boolean;
 	keyboardOverlaySize: number;
 	keyboardOverlayStyle: KeyboardOverlayStyle;
+	keyboardOverlayAnimation: KeyboardOverlayAnimation;
 	keyboardOverlayPosition: KeyboardOverlayPosition;
 	keyboardOverlayOpacity: number;
 	keyboardOverlayOffset: number;
@@ -478,6 +481,11 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 		)
 			? (editor.keyboardOverlayStyle as KeyboardOverlayStyle)
 			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.style,
+		keyboardOverlayAnimation: KEYBOARD_OVERLAY_ANIMATIONS.includes(
+			editor.keyboardOverlayAnimation as KeyboardOverlayAnimation,
+		)
+			? (editor.keyboardOverlayAnimation as KeyboardOverlayAnimation)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.animation,
 		keyboardOverlayPosition: KEYBOARD_OVERLAY_POSITIONS.includes(
 			editor.keyboardOverlayPosition as KeyboardOverlayPosition,
 		)

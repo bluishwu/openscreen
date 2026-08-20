@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import sampleVideoUrl from "../../../tests/fixtures/sample.webm?url";
 import { BackgroundLoadError } from "../wallpaper";
-import { GifExporter } from "./gifExporter";
+import { GifExporter, getGifFrameDelayMs } from "./gifExporter";
 import type { ExportProgress } from "./types";
 
 describe("GifExporter (real browser)", () => {
+	it("uses a GIF-compatible 60 FPS cadence", () => {
+		expect([0, 1, 2].map((index) => getGifFrameDelayMs(60, index))).toEqual([20, 10, 20]);
+	});
+
 	it("exports a valid GIF blob from a real video", async () => {
 		const progressEvents: ExportProgress[] = [];
 

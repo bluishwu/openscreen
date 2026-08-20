@@ -33,7 +33,7 @@ export type ExportQuality = "medium" | "good" | "source";
 // GIF Export Types
 export type ExportFormat = "mp4" | "gif";
 
-export type GifFrameRate = 15 | 20 | 25 | 30;
+export type GifFrameRate = 15 | 20 | 25 | 30 | 60;
 
 export type GifSizePreset = "medium" | "large" | "original";
 
@@ -63,11 +63,12 @@ export const GIF_FRAME_RATES: { value: GifFrameRate; label: string }[] = [
 	{ value: 15, label: "15 FPS - Balanced" },
 	{ value: 20, label: "20 FPS - Smooth" },
 	{ value: 25, label: "25 FPS - Very smooth" },
-	{ value: 30, label: "30 FPS - Maximum" },
+	{ value: 30, label: "30 FPS - Very smooth" },
+	{ value: 60, label: "60 FPS - Ultra smooth (very large file)" },
 ];
 
 // Valid frame rates for validation
-export const VALID_GIF_FRAME_RATES: readonly GifFrameRate[] = [15, 20, 25, 30] as const;
+export const VALID_GIF_FRAME_RATES: readonly GifFrameRate[] = [15, 20, 25, 30, 60] as const;
 
 export function isValidGifFrameRate(rate: number): rate is GifFrameRate {
 	return VALID_GIF_FRAME_RATES.includes(rate as GifFrameRate);

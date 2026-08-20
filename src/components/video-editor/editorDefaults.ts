@@ -1,6 +1,10 @@
 import { DEFAULT_CURSOR_THEME_ID } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
-import type { KeyboardOverlayPosition, KeyboardOverlayStyle } from "@/lib/keyboardEvents";
+import type {
+	KeyboardOverlayAnimation,
+	KeyboardOverlayPosition,
+	KeyboardOverlayStyle,
+} from "@/lib/keyboardEvents";
 import { DEFAULT_WALLPAPER } from "@/lib/wallpaper";
 import type { AspectRatio } from "@/utils/aspectRatioUtils";
 import {
@@ -84,6 +88,7 @@ export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
 	showSingleKeys: false,
 	size: 1,
 	style: "glass",
+	animation: "scale",
 	position: "bottom-center",
 	opacity: 0.86,
 	offset: 0.055,
@@ -93,6 +98,7 @@ export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
 	showSingleKeys: boolean;
 	size: number;
 	style: KeyboardOverlayStyle;
+	animation: KeyboardOverlayAnimation;
 	position: KeyboardOverlayPosition;
 	opacity: number;
 	offset: number;

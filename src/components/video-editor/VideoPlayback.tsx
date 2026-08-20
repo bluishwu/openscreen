@@ -39,7 +39,11 @@ import {
 	resolveInterpolatedNativeCursorFrame,
 	resolveNativeCursorRenderAsset,
 } from "@/lib/cursor/nativeCursor";
-import type { KeyboardOverlayPosition, KeyboardOverlayStyle } from "@/lib/keyboardEvents";
+import type {
+	KeyboardOverlayAnimation,
+	KeyboardOverlayPosition,
+	KeyboardOverlayStyle,
+} from "@/lib/keyboardEvents";
 import { classifyWallpaper, DEFAULT_WALLPAPER, resolveImageWallpaperUrl } from "@/lib/wallpaper";
 import { getCssClipPath } from "@/lib/webcamMaskShapes";
 import type { CursorRecordingData } from "@/native/contracts";
@@ -151,6 +155,7 @@ interface VideoPlaybackProps {
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
 	keyboardOverlayStyle?: KeyboardOverlayStyle;
+	keyboardOverlayAnimation?: KeyboardOverlayAnimation;
 	keyboardOverlayPosition?: KeyboardOverlayPosition;
 	keyboardOverlayOpacity?: number;
 	keyboardOverlayOffset?: number;
@@ -287,6 +292,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			showSingleKeyPresses = false,
 			keyboardOverlaySize = 1,
 			keyboardOverlayStyle = "glass",
+			keyboardOverlayAnimation = "scale",
 			keyboardOverlayPosition = "bottom-center",
 			keyboardOverlayOpacity = 0.86,
 			keyboardOverlayOffset = 0.055,
@@ -2135,6 +2141,7 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 					showSingleKeys={showSingleKeyPresses}
 					size={keyboardOverlaySize}
 					style={keyboardOverlayStyle}
+					animation={keyboardOverlayAnimation}
 					position={keyboardOverlayPosition}
 					backgroundOpacity={keyboardOverlayOpacity}
 					offset={keyboardOverlayOffset}

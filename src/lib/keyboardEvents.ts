@@ -3,7 +3,18 @@ import type { KeyboardModifier, KeyboardRecordingEvent } from "@/native/contract
 export const KEYBOARD_OVERLAY_DURATION_MS = 1_400;
 export const KEYBOARD_OVERLAY_FADE_MS = 220;
 
-export type KeyboardOverlayStyle = "glass" | "dark" | "light" | "minimal";
+export type KeyboardOverlayStyle =
+	| "glass"
+	| "dark"
+	| "light"
+	| "minimal"
+	| "neon"
+	| "pastel"
+	| "retro"
+	| "terminal"
+	| "outline"
+	| "gradient";
+export type KeyboardOverlayAnimation = "none" | "fade" | "scale" | "slide" | "bounce";
 export type KeyboardOverlayPosition =
 	| "top-left"
 	| "top-center"
@@ -17,6 +28,20 @@ export const KEYBOARD_OVERLAY_STYLES: KeyboardOverlayStyle[] = [
 	"dark",
 	"light",
 	"minimal",
+	"neon",
+	"pastel",
+	"retro",
+	"terminal",
+	"outline",
+	"gradient",
+];
+
+export const KEYBOARD_OVERLAY_ANIMATIONS: KeyboardOverlayAnimation[] = [
+	"none",
+	"fade",
+	"scale",
+	"slide",
+	"bounce",
 ];
 
 export const KEYBOARD_OVERLAY_POSITIONS: KeyboardOverlayPosition[] = [
@@ -269,6 +294,41 @@ export function keyboardEventLabels(
 export interface ActiveKeyboardOverlay {
 	event: KeyboardRecordingEvent;
 	opacity: number;
+	ageMs: number;
+}
+
+export interface KeyboardOverlayMotion {
+	opacity: number;
+	scale: number;
+	translateY: number;
+}
+
+const KEYBOARD_OVERLAY_ENTER_MS = 260;
+
+export function getKeyboardOverlayMotion(
+	active: ActiveKeyboardOverlay,
+	animation: KeyboardOverlayAnimation,
+): KeyboardOverlayMotion {
+	const linear = Math.max(0, Math.min(1, active.ageMs / KEYBOARD_OVERLAY_ENTER_MS));
+	const easeOut = 1 - (1 - linear) ** 3;
+	const base = { opacity: active.opacity, scale: 1, translateY: 0 };
+
+	switch (animation) {
+		case "fade":
+			return { ...base, opacity: active.opacity * easeOut };
+		case "scale":
+			return { ...base, opacity: active.opacity * easeOut, scale: 0.72 + easeOut * 0.28 };
+		case "slide":
+			return { ...base, opacity: active.opacity * easeOut, translateY: (1 - easeOut) * 0.9 };
+		case "bounce": {
+			const c1 = 1.70158;
+			const c3 = c1 + 1;
+			const bounce = 1 + c3 * (linear - 1) ** 3 + c1 * (linear - 1) ** 2;
+			return { ...base, opacity: active.opacity * Math.min(1, linear * 2.5), scale: bounce };
+		}
+		default:
+			return base;
+	}
 }
 
 export function keyboardRecordingEventId(event: KeyboardRecordingEvent, index: number): string {
@@ -293,6 +353,7 @@ export function getActiveKeyboardOverlay(
 		return {
 			event,
 			opacity: age <= fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / KEYBOARD_OVERLAY_FADE_MS),
+			ageMs: age,
 		};
 	}
 	return null;

@@ -82,6 +82,7 @@ describe("projectPersistence media compatibility", () => {
 		expect(defaults.showSingleKeyPresses).toBe(false);
 		expect(defaults.keyboardOverlaySize).toBe(1);
 		expect(defaults.keyboardOverlayStyle).toBe("glass");
+		expect(defaults.keyboardOverlayAnimation).toBe("scale");
 		expect(defaults.keyboardOverlayPosition).toBe("bottom-center");
 		expect(defaults.keyboardOverlayOpacity).toBe(0.86);
 		expect(defaults.keyboardOverlayOffset).toBe(0.055);
@@ -92,6 +93,7 @@ describe("projectPersistence media compatibility", () => {
 			showSingleKeyPresses: true,
 			keyboardOverlaySize: 99,
 			keyboardOverlayStyle: "light",
+			keyboardOverlayAnimation: "bounce",
 			keyboardOverlayPosition: "top-right",
 			keyboardOverlayOpacity: -1,
 			keyboardOverlayOffset: 99,
@@ -101,6 +103,7 @@ describe("projectPersistence media compatibility", () => {
 		expect(customized.showSingleKeyPresses).toBe(true);
 		expect(customized.keyboardOverlaySize).toBe(1.6);
 		expect(customized.keyboardOverlayStyle).toBe("light");
+		expect(customized.keyboardOverlayAnimation).toBe("bounce");
 		expect(customized.keyboardOverlayPosition).toBe("top-right");
 		expect(customized.keyboardOverlayOpacity).toBe(0.25);
 		expect(customized.keyboardOverlayOffset).toBe(0.2);

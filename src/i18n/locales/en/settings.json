@@ -229,10 +229,29 @@
 		"singleKeys": "Show single key presses",
 		"size": "Label size",
 		"style": "Style",
+		"animation": "Animation",
 		"position": "Position",
 		"opacity": "Background opacity",
 		"edgeOffset": "Edge margin",
-		"styles": { "glass": "Glass", "dark": "Dark", "light": "Light", "minimal": "Minimal" },
+		"styles": {
+			"glass": "Glass",
+			"dark": "Dark",
+			"light": "Light",
+			"minimal": "Minimal",
+			"neon": "Neon",
+			"pastel": "Pastel",
+			"retro": "Retro",
+			"terminal": "Terminal",
+			"outline": "Outline",
+			"gradient": "Gradient"
+		},
+		"animations": {
+			"none": "None",
+			"fade": "Fade",
+			"scale": "Pop",
+			"slide": "Slide up",
+			"bounce": "Bounce"
+		},
 		"positions": {
 			"top-left": "Top left",
 			"top-center": "Top center",
