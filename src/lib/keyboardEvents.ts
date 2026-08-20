@@ -1,5 +1,6 @@
 import type { KeyboardModifier, KeyboardRecordingEvent } from "@/native/contracts";
 
+export const KEYBOARD_OVERLAY_DURATION_MS = 1_400;
 export const KEYBOARD_OVERLAY_FADE_MS = 220;
 export const LEGACY_KEYBOARD_PRESS_DURATION_MS = 80;
 
@@ -309,6 +310,12 @@ export function normalizeKeyboardRecordingEvent(value: unknown): KeyboardRecordi
 	if (typeof candidate.durationMs === "number" && Number.isFinite(candidate.durationMs)) {
 		normalized.durationMs = Math.max(0, candidate.durationMs);
 	}
+	if (
+		typeof candidate.displayDurationMs === "number" &&
+		Number.isFinite(candidate.displayDurationMs)
+	) {
+		normalized.displayDurationMs = Math.max(1, candidate.displayDurationMs);
+	}
 	if (typeof candidate.id === "string" && candidate.id.trim()) normalized.id = candidate.id.trim();
 	if (typeof candidate.displayText === "string" && candidate.displayText.trim()) {
 		normalized.displayText = candidate.displayText.trim();
@@ -320,6 +327,13 @@ export function keyboardPressDurationMs(event: KeyboardRecordingEvent): number {
 	return typeof event.durationMs === "number" && Number.isFinite(event.durationMs)
 		? Math.max(0, event.durationMs)
 		: LEGACY_KEYBOARD_PRESS_DURATION_MS;
+}
+
+export function keyboardDisplayDurationMs(event: KeyboardRecordingEvent): number {
+	if (typeof event.displayDurationMs === "number" && Number.isFinite(event.displayDurationMs)) {
+		return Math.max(1, event.displayDurationMs);
+	}
+	return Math.max(KEYBOARD_OVERLAY_DURATION_MS, keyboardPressDurationMs(event));
 }
 
 export function keyboardEventLabels(
@@ -444,7 +458,7 @@ export function getActiveKeyboardOverlay(
 		if (disabled.has(keyboardRecordingEventId(event, index))) continue;
 		if (!showSingleKeys && event.modifiers.length === 0) continue;
 		const age = timeMs - event.timeMs;
-		const displayDuration = Math.max(1, keyboardPressDurationMs(event));
+		const displayDuration = keyboardDisplayDurationMs(event);
 		if (age >= displayDuration) return null;
 		const fadeDuration = Math.min(KEYBOARD_OVERLAY_FADE_MS, displayDuration * 0.35);
 		const fadeStart = displayDuration - fadeDuration;

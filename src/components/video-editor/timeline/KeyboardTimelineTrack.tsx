@@ -14,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useScopedT } from "@/contexts/I18nContext";
 import {
+	keyboardDisplayDurationMs,
 	keyboardEventLabels,
-	keyboardPressDurationMs,
 	keyboardRecordingEventId,
 } from "@/lib/keyboardEvents";
 import { cn } from "@/lib/utils";
@@ -126,7 +126,7 @@ export default function KeyboardTimelineTrack({
 		() =>
 			events
 				.map((event, index) => {
-					const durationMs = keyboardPressDurationMs(event);
+					const durationMs = keyboardDisplayDurationMs(event);
 					return {
 						id: keyboardRecordingEventId(event, index),
 						span: { start: event.timeMs, end: event.timeMs + durationMs },

@@ -305,7 +305,7 @@ export default function VideoEditor() {
 							? {
 									...event,
 									timeMs: Math.max(0, Math.round(span.start)),
-									durationMs: Math.max(1, Math.round(span.end - span.start)),
+									displayDurationMs: Math.max(1, Math.round(span.end - span.start)),
 								}
 							: event,
 					)

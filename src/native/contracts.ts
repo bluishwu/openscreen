@@ -43,6 +43,8 @@ export interface KeyboardRecordingEvent {
 	timeMs: number;
 	/** Physical press duration measured from key-down to key-up. */
 	durationMs?: number;
+	/** Editor-controlled display duration. When absent, short taps use the legacy default. */
+	displayDurationMs?: number;
 	/** Optional user-authored text shown instead of the captured key labels. */
 	displayText?: string;
 	/** DOM-style physical key code (for example `KeyK`, `Enter`, or `ArrowLeft`). */

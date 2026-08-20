@@ -4,6 +4,7 @@ import {
 	getKeyboardOverlayMotion,
 	keyboardCodeFromMacKeyCode,
 	keyboardCodeFromWindowsVirtualKey,
+	keyboardDisplayDurationMs,
 	keyboardEventLabels,
 	keyboardPressDurationMs,
 	keyboardRecordingEventId,
@@ -34,6 +35,7 @@ describe("keyboard event normalization", () => {
 			normalizeKeyboardRecordingEvent({
 				timeMs: 10,
 				durationMs: 425,
+				displayDurationMs: 900,
 				id: " key-event-1 ",
 				displayText: " Save project ",
 				code: "Space",
@@ -41,6 +43,7 @@ describe("keyboard event normalization", () => {
 			}),
 		).toMatchObject({
 			durationMs: 425,
+			displayDurationMs: 900,
 			id: "key-event-1",
 			displayText: "Save project",
 		});
@@ -51,6 +54,24 @@ describe("keyboard event normalization", () => {
 			keyboardPressDurationMs({ timeMs: 0, durationMs: 640, code: "Space", modifiers: [] }),
 		).toBe(640);
 		expect(keyboardPressDurationMs({ timeMs: 0, code: "Space", modifiers: [] })).toBe(80);
+	});
+
+	it("keeps the legacy tap duration until the editor overrides it", () => {
+		expect(
+			keyboardDisplayDurationMs({ timeMs: 0, durationMs: 90, code: "KeyK", modifiers: [] }),
+		).toBe(1_400);
+		expect(
+			keyboardDisplayDurationMs({ timeMs: 0, durationMs: 2_100, code: "KeyK", modifiers: [] }),
+		).toBe(2_100);
+		expect(
+			keyboardDisplayDurationMs({
+				timeMs: 0,
+				durationMs: 90,
+				displayDurationMs: 250,
+				code: "KeyK",
+				modifiers: [],
+			}),
+		).toBe(250);
 	});
 
 	it("assigns stable IDs without changing legacy timeline identifiers", () => {
@@ -88,6 +109,7 @@ describe("keyboard overlay selection", () => {
 		const event = {
 			timeMs: 100,
 			durationMs: 250,
+			displayDurationMs: 250,
 			code: "KeyK",
 			modifiers: ["control"] as const,
 			displayText: "Open command palette",
