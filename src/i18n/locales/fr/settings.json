@@ -225,7 +225,20 @@
 		"title": "Clavier",
 		"show": "Afficher les raccourcis",
 		"singleKeys": "Afficher les touches seules",
-		"size": "Taille des étiquettes"
+		"size": "Taille des étiquettes",
+		"style": "Style",
+		"position": "Position",
+		"opacity": "Opacité du fond",
+		"edgeOffset": "Marge du bord",
+		"styles": { "glass": "Verre", "dark": "Sombre", "light": "Clair", "minimal": "Minimal" },
+		"positions": {
+			"top-left": "En haut à gauche",
+			"top-center": "En haut au centre",
+			"top-right": "En haut à droite",
+			"bottom-left": "En bas à gauche",
+			"bottom-center": "En bas au centre",
+			"bottom-right": "En bas à droite"
+		}
 	},
 	"timeline": {
 		"title": "Montage",

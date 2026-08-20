@@ -212,6 +212,11 @@ export default function VideoEditor() {
 		showKeyboardOverlay,
 		showSingleKeyPresses,
 		keyboardOverlaySize,
+		keyboardOverlayStyle,
+		keyboardOverlayPosition,
+		keyboardOverlayOpacity,
+		keyboardOverlayOffset,
+		disabledKeyboardEventIds,
 	} = editorState;
 
 	// Non-undoable state
@@ -426,6 +431,11 @@ export default function VideoEditor() {
 				showKeyboardOverlay: normalizedEditor.showKeyboardOverlay,
 				showSingleKeyPresses: normalizedEditor.showSingleKeyPresses,
 				keyboardOverlaySize: normalizedEditor.keyboardOverlaySize,
+				keyboardOverlayStyle: normalizedEditor.keyboardOverlayStyle,
+				keyboardOverlayPosition: normalizedEditor.keyboardOverlayPosition,
+				keyboardOverlayOpacity: normalizedEditor.keyboardOverlayOpacity,
+				keyboardOverlayOffset: normalizedEditor.keyboardOverlayOffset,
+				disabledKeyboardEventIds: normalizedEditor.disabledKeyboardEventIds,
 			});
 			setExportQuality(normalizedEditor.exportQuality);
 			setExportFormat(normalizedEditor.exportFormat);
@@ -506,6 +516,11 @@ export default function VideoEditor() {
 			showKeyboardOverlay,
 			showSingleKeyPresses,
 			keyboardOverlaySize,
+			keyboardOverlayStyle,
+			keyboardOverlayPosition,
+			keyboardOverlayOpacity,
+			keyboardOverlayOffset,
+			disabledKeyboardEventIds,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -540,6 +555,11 @@ export default function VideoEditor() {
 		showKeyboardOverlay,
 		showSingleKeyPresses,
 		keyboardOverlaySize,
+		keyboardOverlayStyle,
+		keyboardOverlayPosition,
+		keyboardOverlayOpacity,
+		keyboardOverlayOffset,
+		disabledKeyboardEventIds,
 		exportQuality,
 		exportFormat,
 		gifFrameRate,
@@ -671,6 +691,11 @@ export default function VideoEditor() {
 				showKeyboardOverlay,
 				showSingleKeyPresses,
 				keyboardOverlaySize,
+				keyboardOverlayStyle,
+				keyboardOverlayPosition,
+				keyboardOverlayOpacity,
+				keyboardOverlayOffset,
+				disabledKeyboardEventIds,
 				exportQuality,
 				exportFormat,
 				gifFrameRate,
@@ -739,6 +764,11 @@ export default function VideoEditor() {
 			showKeyboardOverlay,
 			showSingleKeyPresses,
 			keyboardOverlaySize,
+			keyboardOverlayStyle,
+			keyboardOverlayPosition,
+			keyboardOverlayOpacity,
+			keyboardOverlayOffset,
+			disabledKeyboardEventIds,
 			exportQuality,
 			exportFormat,
 			gifFrameRate,
@@ -1940,6 +1970,11 @@ export default function VideoEditor() {
 						showKeyboardOverlay,
 						showSingleKeyPresses,
 						keyboardOverlaySize,
+						keyboardOverlayStyle,
+						keyboardOverlayPosition,
+						keyboardOverlayOpacity,
+						keyboardOverlayOffset,
+						disabledKeyboardEventIds,
 						onProgress: (progress: ExportProgress) => {
 							setExportProgress(progress);
 						},
@@ -2037,6 +2072,11 @@ export default function VideoEditor() {
 						showKeyboardOverlay,
 						showSingleKeyPresses,
 						keyboardOverlaySize,
+						keyboardOverlayStyle,
+						keyboardOverlayPosition,
+						keyboardOverlayOpacity,
+						keyboardOverlayOffset,
+						disabledKeyboardEventIds,
 						onProgress: (progress: ExportProgress) => {
 							setExportProgress(progress);
 						},
@@ -2143,6 +2183,11 @@ export default function VideoEditor() {
 			showKeyboardOverlay,
 			showSingleKeyPresses,
 			keyboardOverlaySize,
+			keyboardOverlayStyle,
+			keyboardOverlayPosition,
+			keyboardOverlayOpacity,
+			keyboardOverlayOffset,
+			disabledKeyboardEventIds,
 			effectiveShowCursor,
 			cursorSize,
 			cursorSmoothing,
@@ -2673,6 +2718,11 @@ export default function VideoEditor() {
 													showKeyboardOverlay={showKeyboardOverlay}
 													showSingleKeyPresses={showSingleKeyPresses}
 													keyboardOverlaySize={keyboardOverlaySize}
+													keyboardOverlayStyle={keyboardOverlayStyle}
+													keyboardOverlayPosition={keyboardOverlayPosition}
+													keyboardOverlayOpacity={keyboardOverlayOpacity}
+													keyboardOverlayOffset={keyboardOverlayOffset}
+													disabledKeyboardEventIds={disabledKeyboardEventIds}
 													platform={nativePlatform ?? "linux"}
 													isPreviewingZoom={isPreviewingZoom}
 												/>
@@ -2880,6 +2930,23 @@ export default function VideoEditor() {
 											updateState({ keyboardOverlaySize: size })
 										}
 										onKeyboardOverlaySizeCommit={commitState}
+										keyboardOverlayStyle={keyboardOverlayStyle}
+										onKeyboardOverlayStyleChange={(style) =>
+											pushState({ keyboardOverlayStyle: style })
+										}
+										keyboardOverlayPosition={keyboardOverlayPosition}
+										onKeyboardOverlayPositionChange={(position) =>
+											pushState({ keyboardOverlayPosition: position })
+										}
+										keyboardOverlayOpacity={keyboardOverlayOpacity}
+										onKeyboardOverlayOpacityChange={(opacity) =>
+											updateState({ keyboardOverlayOpacity: opacity })
+										}
+										keyboardOverlayOffset={keyboardOverlayOffset}
+										onKeyboardOverlayOffsetChange={(offset) =>
+											updateState({ keyboardOverlayOffset: offset })
+										}
+										onKeyboardOverlayAppearanceCommit={commitState}
 									/>
 								</div>
 							</div>
@@ -2943,6 +3010,16 @@ export default function VideoEditor() {
 									}
 									videoUrl={videoPath ?? undefined}
 									showTrimWaveform={showTrimWaveform}
+									keyboardEvents={cursorRecordingData?.keyboardEvents ?? []}
+									disabledKeyboardEventIds={disabledKeyboardEventIds}
+									platform={nativePlatform ?? "linux"}
+									onToggleKeyboardEvent={(eventId) =>
+										pushState((previous) => ({
+											disabledKeyboardEventIds: previous.disabledKeyboardEventIds.includes(eventId)
+												? previous.disabledKeyboardEventIds.filter((id) => id !== eventId)
+												: [...previous.disabledKeyboardEventIds, eventId],
+										}))
+									}
 									captionsLabel={t("autoCaptions.button")}
 									isGeneratingCaptions={isAutoCaptioning}
 									onGenerateCaptions={() => {

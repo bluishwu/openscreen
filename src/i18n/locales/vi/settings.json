@@ -216,7 +216,20 @@
 		"title": "Bàn phím",
 		"show": "Hiện phím tắt",
 		"singleKeys": "Hiện phím đơn",
-		"size": "Kích thước nhãn"
+		"size": "Kích thước nhãn",
+		"style": "Kiểu",
+		"position": "Vị trí",
+		"opacity": "Độ mờ nền",
+		"edgeOffset": "Khoảng cách mép",
+		"styles": { "glass": "Kính", "dark": "Tối", "light": "Sáng", "minimal": "Tối giản" },
+		"positions": {
+			"top-left": "Trên trái",
+			"top-center": "Trên giữa",
+			"top-right": "Trên phải",
+			"bottom-left": "Dưới trái",
+			"bottom-center": "Dưới giữa",
+			"bottom-right": "Dưới phải"
+		}
 	},
 	"timeline": {
 		"title": "Dòng thời gian",

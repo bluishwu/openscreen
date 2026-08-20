@@ -1,5 +1,6 @@
 import { DEFAULT_CURSOR_THEME_ID } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
+import type { KeyboardOverlayPosition, KeyboardOverlayStyle } from "@/lib/keyboardEvents";
 import { DEFAULT_WALLPAPER } from "@/lib/wallpaper";
 import type { AspectRatio } from "@/utils/aspectRatioUtils";
 import {
@@ -82,7 +83,21 @@ export const DEFAULT_KEYBOARD_OVERLAY_SETTINGS = {
 	show: true,
 	showSingleKeys: false,
 	size: 1,
-} as const;
+	style: "glass",
+	position: "bottom-center",
+	opacity: 0.86,
+	offset: 0.055,
+	disabledEventIds: [],
+} as const satisfies {
+	show: boolean;
+	showSingleKeys: boolean;
+	size: number;
+	style: KeyboardOverlayStyle;
+	position: KeyboardOverlayPosition;
+	opacity: number;
+	offset: number;
+	disabledEventIds: string[];
+};
 
 export const DEFAULT_EXPORT_SETTINGS: {
 	quality: ExportQuality;

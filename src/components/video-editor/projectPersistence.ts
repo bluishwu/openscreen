@@ -2,6 +2,12 @@ import { normalizeTextAnimation } from "@/lib/annotationTextAnimation";
 import { normalizeBlurColor, normalizeBlurType } from "@/lib/blurEffects";
 import { normalizeCursorThemeId } from "@/lib/cursor/cursorThemes";
 import type { ExportFormat, ExportQuality, GifFrameRate, GifSizePreset } from "@/lib/exporter";
+import {
+	KEYBOARD_OVERLAY_POSITIONS,
+	KEYBOARD_OVERLAY_STYLES,
+	type KeyboardOverlayPosition,
+	type KeyboardOverlayStyle,
+} from "@/lib/keyboardEvents";
 import type { ProjectMedia } from "@/lib/recordingSession";
 import { normalizeProjectMedia } from "@/lib/recordingSession";
 import { DEFAULT_WALLPAPER, WALLPAPER_PATHS } from "@/lib/wallpaper";
@@ -96,6 +102,11 @@ export interface ProjectEditorState {
 	showKeyboardOverlay: boolean;
 	showSingleKeyPresses: boolean;
 	keyboardOverlaySize: number;
+	keyboardOverlayStyle: KeyboardOverlayStyle;
+	keyboardOverlayPosition: KeyboardOverlayPosition;
+	keyboardOverlayOpacity: number;
+	keyboardOverlayOffset: number;
+	disabledKeyboardEventIds: string[];
 }
 
 export interface EditorProjectData {
@@ -462,6 +473,29 @@ export function normalizeProjectEditor(editor: Partial<ProjectEditorState>): Pro
 		keyboardOverlaySize: isFiniteNumber(editor.keyboardOverlaySize)
 			? clamp(editor.keyboardOverlaySize, 0.6, 1.6)
 			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.size,
+		keyboardOverlayStyle: KEYBOARD_OVERLAY_STYLES.includes(
+			editor.keyboardOverlayStyle as KeyboardOverlayStyle,
+		)
+			? (editor.keyboardOverlayStyle as KeyboardOverlayStyle)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.style,
+		keyboardOverlayPosition: KEYBOARD_OVERLAY_POSITIONS.includes(
+			editor.keyboardOverlayPosition as KeyboardOverlayPosition,
+		)
+			? (editor.keyboardOverlayPosition as KeyboardOverlayPosition)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.position,
+		keyboardOverlayOpacity: isFiniteNumber(editor.keyboardOverlayOpacity)
+			? clamp(editor.keyboardOverlayOpacity, 0.25, 1)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.opacity,
+		keyboardOverlayOffset: isFiniteNumber(editor.keyboardOverlayOffset)
+			? clamp(editor.keyboardOverlayOffset, 0.02, 0.2)
+			: DEFAULT_KEYBOARD_OVERLAY_SETTINGS.offset,
+		disabledKeyboardEventIds: Array.isArray(editor.disabledKeyboardEventIds)
+			? [
+					...new Set(
+						editor.disabledKeyboardEventIds.filter((id): id is string => typeof id === "string"),
+					),
+				]
+			: [],
 		wallpaper:
 			typeof editor.wallpaper === "string"
 				? normalizeWallpaperValue(editor.wallpaper)

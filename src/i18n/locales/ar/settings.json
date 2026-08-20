@@ -216,7 +216,20 @@
 		"title": "لوحة المفاتيح",
 		"show": "إظهار الاختصارات",
 		"singleKeys": "إظهار ضغطات المفاتيح المفردة",
-		"size": "حجم التسمية"
+		"size": "حجم التسمية",
+		"style": "النمط",
+		"position": "الموضع",
+		"opacity": "عتامة الخلفية",
+		"edgeOffset": "الهامش من الحافة",
+		"styles": { "glass": "زجاجي", "dark": "داكن", "light": "فاتح", "minimal": "بسيط" },
+		"positions": {
+			"top-left": "أعلى اليسار",
+			"top-center": "أعلى الوسط",
+			"top-right": "أعلى اليمين",
+			"bottom-left": "أسفل اليسار",
+			"bottom-center": "أسفل الوسط",
+			"bottom-right": "أسفل اليمين"
+		}
 	},
 	"timeline": {
 		"title": "المخطط الزمني",

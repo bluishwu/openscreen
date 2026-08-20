@@ -225,7 +225,20 @@
 		"title": "키보드",
 		"show": "단축키 표시",
 		"singleKeys": "단일 키 입력 표시",
-		"size": "레이블 크기"
+		"size": "레이블 크기",
+		"style": "스타일",
+		"position": "위치",
+		"opacity": "배경 불투명도",
+		"edgeOffset": "가장자리 여백",
+		"styles": { "glass": "글래스", "dark": "다크", "light": "라이트", "minimal": "미니멀" },
+		"positions": {
+			"top-left": "왼쪽 위",
+			"top-center": "위 중앙",
+			"top-right": "오른쪽 위",
+			"bottom-left": "왼쪽 아래",
+			"bottom-center": "아래 중앙",
+			"bottom-right": "오른쪽 아래"
+		}
 	},
 	"timeline": {
 		"title": "타임라인",

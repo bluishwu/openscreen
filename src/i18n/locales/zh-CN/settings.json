@@ -216,7 +216,20 @@
 		"title": "键盘",
 		"show": "显示快捷键",
 		"singleKeys": "显示单键按下",
-		"size": "标签大小"
+		"size": "标签大小",
+		"style": "样式",
+		"position": "摆放位置",
+		"opacity": "背景透明度",
+		"edgeOffset": "边缘距离",
+		"styles": { "glass": "玻璃", "dark": "深色", "light": "浅色", "minimal": "极简" },
+		"positions": {
+			"top-left": "左上",
+			"top-center": "顶部居中",
+			"top-right": "右上",
+			"bottom-left": "左下",
+			"bottom-center": "底部居中",
+			"bottom-right": "右下"
+		}
 	},
 	"timeline": {
 		"title": "时间轴",

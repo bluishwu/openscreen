@@ -12,7 +12,8 @@
 		"pressTrim": "按 T 新增剪輯",
 		"pressAnnotation": "按 A 新增標註",
 		"pressSpeed": "按 S 新增速度",
-		"pressBlur": "按 B 新增模糊區域"
+		"pressBlur": "按 B 新增模糊區域",
+		"keyboard": "錄製的快捷鍵會顯示在這裡，點擊可停用"
 	},
 	"labels": {
 		"pan": "平移",

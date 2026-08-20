@@ -27,12 +27,14 @@ import { useShortcuts } from "@/contexts/ShortcutsContext";
 import { useAudioPeaks } from "@/hooks/useAudioPeaks";
 import { matchesShortcut } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
+import type { KeyboardRecordingEvent } from "@/native/contracts";
 import { ASPECT_RATIOS, type AspectRatio, getAspectRatioLabel } from "@/utils/aspectRatioUtils";
 import { formatShortcut } from "@/utils/platformUtils";
 import { BLUR_REGIONS_ENABLED } from "../featureFlags";
 import type { AnnotationRegion, SpeedRegion, TrimRegion, ZoomRegion } from "../types";
 import BackgroundWaveform from "./BackgroundWaveform";
 import Item from "./Item";
+import KeyboardTimelineTrack from "./KeyboardTimelineTrack";
 import KeyframeMarkers from "./KeyframeMarkers";
 import Row from "./Row";
 import TimelineWrapper from "./TimelineWrapper";
@@ -42,6 +44,7 @@ const TRIM_ROW_ID = "row-trim";
 const ANNOTATION_ROW_ID = "row-annotation";
 const BLUR_ROW_ID = "row-blur";
 const SPEED_ROW_ID = "row-speed";
+const KEYBOARD_ROW_ID = "row-keyboard";
 const FALLBACK_RANGE_MS = 1000;
 const TARGET_MARKER_COUNT = 12;
 
@@ -90,6 +93,10 @@ interface TimelineEditorProps {
 	onAspectRatioChange: (aspectRatio: AspectRatio) => void;
 	videoUrl?: string;
 	showTrimWaveform?: boolean;
+	keyboardEvents?: KeyboardRecordingEvent[];
+	disabledKeyboardEventIds?: string[];
+	onToggleKeyboardEvent?: (eventId: string) => void;
+	platform?: string;
 	/** Opens the auto-captions flow. When omitted, the captions button is hidden. */
 	onGenerateCaptions?: () => void;
 	isGeneratingCaptions?: boolean;
@@ -571,6 +578,10 @@ function Timeline({
 	keyframes = [],
 	videoUrl,
 	showTrimWaveform = false,
+	keyboardEvents = [],
+	disabledKeyboardEventIds = [],
+	onToggleKeyboardEvent,
+	platform = "linux",
 }: {
 	items: TimelineRenderItem[];
 	videoDurationMs: number;
@@ -590,6 +601,10 @@ function Timeline({
 	keyframes?: { id: string; time: number }[];
 	videoUrl?: string;
 	showTrimWaveform?: boolean;
+	keyboardEvents?: KeyboardRecordingEvent[];
+	disabledKeyboardEventIds?: string[];
+	onToggleKeyboardEvent?: (eventId: string) => void;
+	platform?: string;
 }) {
 	const t = useScopedT("timeline");
 	const { setTimelineRef, style, sidebarWidth, range, pixelsToValue } = useTimelineContext();
@@ -794,6 +809,15 @@ function Timeline({
 				))}
 			</Row>
 
+			<Row id={KEYBOARD_ROW_ID} isEmpty={keyboardEvents.length === 0} hint={t("hints.keyboard")}>
+				<KeyboardTimelineTrack
+					events={keyboardEvents}
+					disabledEventIds={disabledKeyboardEventIds}
+					platform={platform}
+					onToggleEvent={onToggleKeyboardEvent}
+				/>
+			</Row>
+
 			<Row
 				id={TRIM_ROW_ID}
 				isEmpty={trimItems.length === 0}
@@ -925,6 +949,10 @@ export default function TimelineEditor({
 	onAspectRatioChange,
 	videoUrl,
 	showTrimWaveform = false,
+	keyboardEvents = [],
+	disabledKeyboardEventIds = [],
+	onToggleKeyboardEvent,
+	platform = "linux",
 	onGenerateCaptions,
 	isGeneratingCaptions = false,
 	captionsLabel,
@@ -1660,6 +1688,10 @@ export default function TimelineEditor({
 						keyframes={keyframes}
 						videoUrl={videoUrl}
 						showTrimWaveform={showTrimWaveform}
+						keyboardEvents={keyboardEvents}
+						disabledKeyboardEventIds={disabledKeyboardEventIds}
+						onToggleKeyboardEvent={onToggleKeyboardEvent}
+						platform={platform}
 					/>
 				</TimelineWrapper>
 			</div>

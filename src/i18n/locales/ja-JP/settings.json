@@ -225,7 +225,20 @@
 		"title": "キーボード",
 		"show": "ショートカットを表示",
 		"singleKeys": "単一キーを表示",
-		"size": "ラベルサイズ"
+		"size": "ラベルサイズ",
+		"style": "スタイル",
+		"position": "位置",
+		"opacity": "背景の不透明度",
+		"edgeOffset": "端からの余白",
+		"styles": { "glass": "ガラス", "dark": "ダーク", "light": "ライト", "minimal": "ミニマル" },
+		"positions": {
+			"top-left": "左上",
+			"top-center": "上中央",
+			"top-right": "右上",
+			"bottom-left": "左下",
+			"bottom-center": "下中央",
+			"bottom-right": "右下"
+		}
 	},
 	"timeline": {
 		"title": "タイムライン",

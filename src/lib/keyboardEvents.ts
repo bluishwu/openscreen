@@ -3,6 +3,31 @@ import type { KeyboardModifier, KeyboardRecordingEvent } from "@/native/contract
 export const KEYBOARD_OVERLAY_DURATION_MS = 1_400;
 export const KEYBOARD_OVERLAY_FADE_MS = 220;
 
+export type KeyboardOverlayStyle = "glass" | "dark" | "light" | "minimal";
+export type KeyboardOverlayPosition =
+	| "top-left"
+	| "top-center"
+	| "top-right"
+	| "bottom-left"
+	| "bottom-center"
+	| "bottom-right";
+
+export const KEYBOARD_OVERLAY_STYLES: KeyboardOverlayStyle[] = [
+	"glass",
+	"dark",
+	"light",
+	"minimal",
+];
+
+export const KEYBOARD_OVERLAY_POSITIONS: KeyboardOverlayPosition[] = [
+	"top-left",
+	"top-center",
+	"top-right",
+	"bottom-left",
+	"bottom-center",
+	"bottom-right",
+];
+
 const WINDOWS_VK_TO_CODE: Record<number, string> = {
 	8: "Backspace",
 	9: "Tab",
@@ -246,14 +271,21 @@ export interface ActiveKeyboardOverlay {
 	opacity: number;
 }
 
+export function keyboardRecordingEventId(event: KeyboardRecordingEvent, index: number): string {
+	return `${Math.round(event.timeMs)}:${event.code}:${event.modifiers.join(".")}:${index}`;
+}
+
 export function getActiveKeyboardOverlay(
 	events: KeyboardRecordingEvent[],
 	timeMs: number,
 	showSingleKeys: boolean,
+	disabledEventIds: readonly string[] = [],
 ): ActiveKeyboardOverlay | null {
+	const disabled = new Set(disabledEventIds);
 	for (let index = events.length - 1; index >= 0; index -= 1) {
 		const event = events[index];
 		if (event.timeMs > timeMs) continue;
+		if (disabled.has(keyboardRecordingEventId(event, index))) continue;
 		if (!showSingleKeys && event.modifiers.length === 0) continue;
 		const age = timeMs - event.timeMs;
 		if (age >= KEYBOARD_OVERLAY_DURATION_MS) return null;

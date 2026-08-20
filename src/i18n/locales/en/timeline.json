@@ -16,7 +16,8 @@
 		"pressTrim": "Press T to add trim",
 		"pressAnnotation": "Press A to add annotation",
 		"pressBlur": "Press B to add blur region",
-		"pressSpeed": "Press S to add speed"
+		"pressSpeed": "Press S to add speed",
+		"keyboard": "Recorded shortcuts appear here — click one to disable it"
 	},
 	"labels": {
 		"pan": "Pan",

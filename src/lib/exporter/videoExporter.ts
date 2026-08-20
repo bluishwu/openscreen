@@ -7,6 +7,7 @@ import type {
 	WebcamSizePreset,
 	ZoomRegion,
 } from "@/components/video-editor/types";
+import { keyboardRecordingEventId } from "@/lib/keyboardEvents";
 import { BackgroundLoadError } from "@/lib/wallpaper";
 import type { CursorRecordingData } from "@/native/contracts";
 import { getPlatform } from "@/utils/platformUtils";
@@ -56,6 +57,11 @@ export interface VideoExporterConfig extends ExportConfig {
 	showKeyboardOverlay?: boolean;
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
+	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
+	keyboardOverlayOpacity?: number;
+	keyboardOverlayOffset?: number;
+	disabledKeyboardEventIds?: string[];
 	onProgress?: (progress: ExportProgress) => void;
 }
 
@@ -116,7 +122,9 @@ export function getSourceCopyFastPathBlockers(
 	if (
 		config.showKeyboardOverlay &&
 		config.cursorRecordingData?.keyboardEvents.some(
-			(event) => config.showSingleKeyPresses || event.modifiers.length > 0,
+			(event, index) =>
+				(config.showSingleKeyPresses || event.modifiers.length > 0) &&
+				!config.disabledKeyboardEventIds?.includes(keyboardRecordingEventId(event, index)),
 		)
 	) {
 		blockers.push("keyboard overlay is enabled");
@@ -276,6 +284,11 @@ export class VideoExporter {
 				showKeyboardOverlay: this.config.showKeyboardOverlay,
 				showSingleKeyPresses: this.config.showSingleKeyPresses,
 				keyboardOverlaySize: this.config.keyboardOverlaySize,
+				keyboardOverlayStyle: this.config.keyboardOverlayStyle,
+				keyboardOverlayPosition: this.config.keyboardOverlayPosition,
+				keyboardOverlayOpacity: this.config.keyboardOverlayOpacity,
+				keyboardOverlayOffset: this.config.keyboardOverlayOffset,
+				disabledKeyboardEventIds: this.config.disabledKeyboardEventIds,
 				platform,
 			});
 			this.renderer = renderer;

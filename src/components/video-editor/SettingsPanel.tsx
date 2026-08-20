@@ -52,6 +52,11 @@ import {
 	GIF_FRAME_RATES,
 	GIF_SIZE_PRESETS,
 } from "@/lib/exporter";
+import {
+	KEYBOARD_OVERLAY_POSITIONS,
+	type KeyboardOverlayPosition,
+	type KeyboardOverlayStyle,
+} from "@/lib/keyboardEvents";
 import { cn } from "@/lib/utils";
 import { resolveImageWallpaperUrl, WALLPAPER_PATHS } from "@/lib/wallpaper";
 import { type AspectRatio, isPortraitAspectRatio } from "@/utils/aspectRatioUtils";
@@ -357,6 +362,15 @@ interface SettingsPanelProps {
 	keyboardOverlaySize?: number;
 	onKeyboardOverlaySizeChange?: (size: number) => void;
 	onKeyboardOverlaySizeCommit?: () => void;
+	keyboardOverlayStyle?: KeyboardOverlayStyle;
+	onKeyboardOverlayStyleChange?: (style: KeyboardOverlayStyle) => void;
+	keyboardOverlayPosition?: KeyboardOverlayPosition;
+	onKeyboardOverlayPositionChange?: (position: KeyboardOverlayPosition) => void;
+	keyboardOverlayOpacity?: number;
+	onKeyboardOverlayOpacityChange?: (opacity: number) => void;
+	keyboardOverlayOffset?: number;
+	onKeyboardOverlayOffsetChange?: (offset: number) => void;
+	onKeyboardOverlayAppearanceCommit?: () => void;
 }
 
 export default SettingsPanel;
@@ -508,6 +522,15 @@ export function SettingsPanel({
 	keyboardOverlaySize = 1,
 	onKeyboardOverlaySizeChange,
 	onKeyboardOverlaySizeCommit,
+	keyboardOverlayStyle = "glass",
+	onKeyboardOverlayStyleChange,
+	keyboardOverlayPosition = "bottom-center",
+	onKeyboardOverlayPositionChange,
+	keyboardOverlayOpacity = 0.86,
+	onKeyboardOverlayOpacityChange,
+	keyboardOverlayOffset = 0.055,
+	onKeyboardOverlayOffsetChange,
+	onKeyboardOverlayAppearanceCommit,
 }: SettingsPanelProps) {
 	const t = useScopedT("settings");
 	const [activePanelMode, setActivePanelMode] = useState<SettingsPanelMode>("background");
@@ -1760,6 +1783,70 @@ export function SettingsPanel({
 															className="data-[state=checked]:bg-[#34B27B] scale-90"
 														/>
 													</div>
+													<div className="space-y-1.5">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.style")}
+														</div>
+														<div className="grid grid-cols-2 gap-1.5">
+															{(["glass", "dark", "light", "minimal"] as const).map((style) => (
+																<button
+																	type="button"
+																	key={style}
+																	onClick={() => onKeyboardOverlayStyleChange?.(style)}
+																	className={cn(
+																		"flex h-8 items-center gap-2 rounded-md border px-2 text-[9px] font-medium transition-all",
+																		keyboardOverlayStyle === style
+																			? "border-[#34B27B]/60 bg-[#34B27B]/10 text-white"
+																			: "border-white/[0.07] bg-white/[0.035] text-slate-400 hover:bg-white/[0.07]",
+																	)}
+																>
+																	<span
+																		className={cn(
+																			"flex h-5 w-7 items-center justify-center rounded border text-[8px] font-bold",
+																			style === "light"
+																				? "border-slate-300 bg-white text-slate-800"
+																				: style === "minimal"
+																					? "border-white/20 bg-transparent text-white"
+																					: "border-white/15 bg-black/70 text-white",
+																		)}
+																	>
+																		⌘K
+																	</span>
+																	{t(`keyboard.styles.${style}`)}
+																</button>
+															))}
+														</div>
+													</div>
+													<div className="space-y-1.5">
+														<div className="text-[10px] font-medium text-slate-300">
+															{t("keyboard.position")}
+														</div>
+														<div className="grid grid-cols-3 gap-1 rounded-lg border border-white/[0.06] bg-black/20 p-1.5">
+															{KEYBOARD_OVERLAY_POSITIONS.map((position) => (
+																<button
+																	type="button"
+																	key={position}
+																	title={t(`keyboard.positions.${position}`)}
+																	onClick={() => onKeyboardOverlayPositionChange?.(position)}
+																	className={cn(
+																		"flex h-7 items-center justify-center rounded border transition-all",
+																		keyboardOverlayPosition === position
+																			? "border-[#34B27B]/60 bg-[#34B27B]/15"
+																			: "border-white/[0.05] bg-white/[0.025] hover:bg-white/[0.07]",
+																	)}
+																>
+																	<span
+																		className={cn(
+																			"h-1.5 w-4 rounded-full",
+																			keyboardOverlayPosition === position
+																				? "bg-[#34B27B]"
+																				: "bg-white/25",
+																		)}
+																	/>
+																</button>
+															))}
+														</div>
+													</div>
 													<div className="p-2 rounded-lg bg-white/5 border border-white/5">
 														<div className="flex items-center justify-between mb-1">
 															<div className="text-[10px] font-medium text-slate-300">
@@ -1776,6 +1863,46 @@ export function SettingsPanel({
 															min={0.6}
 															max={1.6}
 															step={0.05}
+															className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+														/>
+													</div>
+													<div className="p-2 rounded-lg bg-white/5 border border-white/5">
+														<div className="flex items-center justify-between mb-1">
+															<div className="text-[10px] font-medium text-slate-300">
+																{t("keyboard.opacity")}
+															</div>
+															<span className="text-[10px] text-slate-500 font-mono">
+																{Math.round(keyboardOverlayOpacity * 100)}%
+															</span>
+														</div>
+														<Slider
+															value={[keyboardOverlayOpacity]}
+															onValueChange={(values) =>
+																onKeyboardOverlayOpacityChange?.(values[0])
+															}
+															onValueCommit={() => onKeyboardOverlayAppearanceCommit?.()}
+															min={0.25}
+															max={1}
+															step={0.05}
+															className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+														/>
+													</div>
+													<div className="p-2 rounded-lg bg-white/5 border border-white/5">
+														<div className="flex items-center justify-between mb-1">
+															<div className="text-[10px] font-medium text-slate-300">
+																{t("keyboard.edgeOffset")}
+															</div>
+															<span className="text-[10px] text-slate-500 font-mono">
+																{Math.round(keyboardOverlayOffset * 100)}%
+															</span>
+														</div>
+														<Slider
+															value={[keyboardOverlayOffset]}
+															onValueChange={(values) => onKeyboardOverlayOffsetChange?.(values[0])}
+															onValueCommit={() => onKeyboardOverlayAppearanceCommit?.()}
+															min={0.02}
+															max={0.2}
+															step={0.005}
 															className="w-full [&_[role=slider]]:bg-[#34B27B] [&_[role=slider]]:border-[#34B27B] [&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
 														/>
 													</div>

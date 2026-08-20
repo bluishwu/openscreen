@@ -216,7 +216,20 @@
 		"title": "Klavye",
 		"show": "Kısayolları göster",
 		"singleKeys": "Tek tuşları göster",
-		"size": "Etiket boyutu"
+		"size": "Etiket boyutu",
+		"style": "Stil",
+		"position": "Konum",
+		"opacity": "Arka plan opaklığı",
+		"edgeOffset": "Kenar boşluğu",
+		"styles": { "glass": "Cam", "dark": "Koyu", "light": "Açık", "minimal": "Minimal" },
+		"positions": {
+			"top-left": "Sol üst",
+			"top-center": "Üst orta",
+			"top-right": "Sağ üst",
+			"bottom-left": "Sol alt",
+			"bottom-center": "Alt orta",
+			"bottom-right": "Sağ alt"
+		}
 	},
 	"timeline": {
 		"title": "Zaman Tüneli",

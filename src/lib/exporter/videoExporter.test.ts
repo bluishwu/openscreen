@@ -122,6 +122,22 @@ describe("isSourceCopyFastPathEligible", () => {
 				videoInfo,
 			),
 		).toBe(false);
+		expect(
+			isSourceCopyFastPathEligible(
+				createConfig({
+					showKeyboardOverlay: true,
+					disabledKeyboardEventIds: ["100:KeyK:control:0"],
+					cursorRecordingData: {
+						version: 2,
+						provider: "none",
+						assets: [],
+						samples: [],
+						keyboardEvents: [{ timeMs: 100, code: "KeyK", modifiers: ["control"] }],
+					},
+				}),
+				videoInfo,
+			),
+		).toBe(true);
 	});
 });
 

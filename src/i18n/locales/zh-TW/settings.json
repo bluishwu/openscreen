@@ -217,7 +217,20 @@
 		"title": "鍵盤",
 		"show": "顯示快捷鍵",
 		"singleKeys": "顯示單鍵按下",
-		"size": "標籤大小"
+		"size": "標籤大小",
+		"style": "樣式",
+		"position": "擺放位置",
+		"opacity": "背景透明度",
+		"edgeOffset": "邊緣距離",
+		"styles": { "glass": "玻璃", "dark": "深色", "light": "淺色", "minimal": "極簡" },
+		"positions": {
+			"top-left": "左上",
+			"top-center": "頂部置中",
+			"top-right": "右上",
+			"bottom-left": "左下",
+			"bottom-center": "底部置中",
+			"bottom-right": "右下"
+		}
 	},
 	"timeline": {
 		"title": "時間軸",

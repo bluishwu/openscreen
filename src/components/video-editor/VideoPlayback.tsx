@@ -39,6 +39,7 @@ import {
 	resolveInterpolatedNativeCursorFrame,
 	resolveNativeCursorRenderAsset,
 } from "@/lib/cursor/nativeCursor";
+import type { KeyboardOverlayPosition, KeyboardOverlayStyle } from "@/lib/keyboardEvents";
 import { classifyWallpaper, DEFAULT_WALLPAPER, resolveImageWallpaperUrl } from "@/lib/wallpaper";
 import { getCssClipPath } from "@/lib/webcamMaskShapes";
 import type { CursorRecordingData } from "@/native/contracts";
@@ -149,6 +150,11 @@ interface VideoPlaybackProps {
 	showKeyboardOverlay?: boolean;
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
+	keyboardOverlayStyle?: KeyboardOverlayStyle;
+	keyboardOverlayPosition?: KeyboardOverlayPosition;
+	keyboardOverlayOpacity?: number;
+	keyboardOverlayOffset?: number;
+	disabledKeyboardEventIds?: string[];
 	platform?: string;
 	// Render the selected zoom at the playhead even while paused, so the editor can
 	// preview the effect without leaving the focus-edit view.
@@ -280,6 +286,11 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 			showKeyboardOverlay = true,
 			showSingleKeyPresses = false,
 			keyboardOverlaySize = 1,
+			keyboardOverlayStyle = "glass",
+			keyboardOverlayPosition = "bottom-center",
+			keyboardOverlayOpacity = 0.86,
+			keyboardOverlayOffset = 0.055,
+			disabledKeyboardEventIds = [],
 			platform = "linux",
 			isPreviewingZoom = false,
 		},
@@ -2123,6 +2134,11 @@ const VideoPlayback = forwardRef<VideoPlaybackRef, VideoPlaybackProps>(
 					show={showKeyboardOverlay}
 					showSingleKeys={showSingleKeyPresses}
 					size={keyboardOverlaySize}
+					style={keyboardOverlayStyle}
+					position={keyboardOverlayPosition}
+					backgroundOpacity={keyboardOverlayOpacity}
+					offset={keyboardOverlayOffset}
+					disabledEventIds={disabledKeyboardEventIds}
 					platform={platform}
 					canvasWidth={overlaySize.width}
 					canvasHeight={overlaySize.height}

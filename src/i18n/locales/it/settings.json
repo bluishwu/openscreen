@@ -224,7 +224,20 @@
 		"title": "Tastiera",
 		"show": "Mostra scorciatoie",
 		"singleKeys": "Mostra tasti singoli",
-		"size": "Dimensione etichette"
+		"size": "Dimensione etichette",
+		"style": "Stile",
+		"position": "Posizione",
+		"opacity": "Opacità sfondo",
+		"edgeOffset": "Margine dal bordo",
+		"styles": { "glass": "Vetro", "dark": "Scuro", "light": "Chiaro", "minimal": "Minimale" },
+		"positions": {
+			"top-left": "In alto a sinistra",
+			"top-center": "In alto al centro",
+			"top-right": "In alto a destra",
+			"bottom-left": "In basso a sinistra",
+			"bottom-center": "In basso al centro",
+			"bottom-right": "In basso a destra"
+		}
 	},
 	"timeline": {
 		"title": "Timeline",

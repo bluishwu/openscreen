@@ -20,6 +20,7 @@ import {
 	DEFAULT_WEBCAM_MIRRORED,
 	DEFAULT_WEBCAM_REACTIVE_ZOOM,
 } from "@/components/video-editor/types";
+import type { KeyboardOverlayPosition, KeyboardOverlayStyle } from "@/lib/keyboardEvents";
 import type { AspectRatio } from "@/utils/aspectRatioUtils";
 
 // Undoable state. Selection IDs are excluded, since undoing a selection change
@@ -52,6 +53,11 @@ export interface EditorState {
 	showKeyboardOverlay: boolean;
 	showSingleKeyPresses: boolean;
 	keyboardOverlaySize: number;
+	keyboardOverlayStyle: KeyboardOverlayStyle;
+	keyboardOverlayPosition: KeyboardOverlayPosition;
+	keyboardOverlayOpacity: number;
+	keyboardOverlayOffset: number;
+	disabledKeyboardEventIds: string[];
 }
 
 export const INITIAL_EDITOR_STATE: EditorState = {
@@ -79,6 +85,11 @@ export const INITIAL_EDITOR_STATE: EditorState = {
 	showKeyboardOverlay: true,
 	showSingleKeyPresses: false,
 	keyboardOverlaySize: 1,
+	keyboardOverlayStyle: "glass",
+	keyboardOverlayPosition: "bottom-center",
+	keyboardOverlayOpacity: 0.86,
+	keyboardOverlayOffset: 0.055,
+	disabledKeyboardEventIds: [],
 };
 
 type StateUpdate = Partial<EditorState> | ((prev: EditorState) => Partial<EditorState>);

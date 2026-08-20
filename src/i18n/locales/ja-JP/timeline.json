@@ -12,7 +12,8 @@
 		"pressTrim": "Tキーを押してトリムを追加",
 		"pressAnnotation": "Aキーを押して注釈を追加",
 		"pressBlur": "Bキーを押してぼかしを追加",
-		"pressSpeed": "Sキーを押して再生速度を追加"
+		"pressSpeed": "Sキーを押して再生速度を追加",
+		"keyboard": "録画したショートカットがここに表示されます。クリックで無効化できます"
 	},
 	"labels": {
 		"pan": "移動",

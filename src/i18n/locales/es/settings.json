@@ -225,7 +225,20 @@
 		"title": "Teclado",
 		"show": "Mostrar atajos",
 		"singleKeys": "Mostrar pulsaciones individuales",
-		"size": "Tamaño de etiqueta"
+		"size": "Tamaño de etiqueta",
+		"style": "Estilo",
+		"position": "Posición",
+		"opacity": "Opacidad del fondo",
+		"edgeOffset": "Margen del borde",
+		"styles": { "glass": "Cristal", "dark": "Oscuro", "light": "Claro", "minimal": "Mínimo" },
+		"positions": {
+			"top-left": "Superior izquierda",
+			"top-center": "Superior centro",
+			"top-right": "Superior derecha",
+			"bottom-left": "Inferior izquierda",
+			"bottom-center": "Inferior centro",
+			"bottom-right": "Inferior derecha"
+		}
 	},
 	"timeline": {
 		"title": "Línea de tiempo",

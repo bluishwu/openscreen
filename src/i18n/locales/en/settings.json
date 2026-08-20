@@ -227,7 +227,20 @@
 		"title": "Keyboard",
 		"show": "Show shortcuts",
 		"singleKeys": "Show single key presses",
-		"size": "Label size"
+		"size": "Label size",
+		"style": "Style",
+		"position": "Position",
+		"opacity": "Background opacity",
+		"edgeOffset": "Edge margin",
+		"styles": { "glass": "Glass", "dark": "Dark", "light": "Light", "minimal": "Minimal" },
+		"positions": {
+			"top-left": "Top left",
+			"top-center": "Top center",
+			"top-right": "Top right",
+			"bottom-left": "Bottom left",
+			"bottom-center": "Bottom center",
+			"bottom-right": "Bottom right"
+		}
 	},
 	"timeline": {
 		"title": "Timeline",

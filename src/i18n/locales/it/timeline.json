@@ -12,7 +12,8 @@
 		"pressTrim": "Premi T per aggiungere taglio",
 		"pressAnnotation": "Premi A per aggiungere annotazione",
 		"pressBlur": "Premi B per aggiungere regione sfocatura",
-		"pressSpeed": "Premi S per aggiungere velocità"
+		"pressSpeed": "Premi S per aggiungere velocità",
+		"keyboard": "Le scorciatoie registrate appaiono qui; fai clic per disattivarle"
 	},
 	"labels": {
 		"pan": "Panoramica",

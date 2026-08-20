@@ -208,7 +208,20 @@
 		"title": "Teclado",
 		"show": "Mostrar atalhos",
 		"singleKeys": "Mostrar teclas individuais",
-		"size": "Tamanho dos rótulos"
+		"size": "Tamanho dos rótulos",
+		"style": "Estilo",
+		"position": "Posição",
+		"opacity": "Opacidade do fundo",
+		"edgeOffset": "Margem da borda",
+		"styles": { "glass": "Vidro", "dark": "Escuro", "light": "Claro", "minimal": "Mínimo" },
+		"positions": {
+			"top-left": "Superior esquerdo",
+			"top-center": "Superior central",
+			"top-right": "Superior direito",
+			"bottom-left": "Inferior esquerdo",
+			"bottom-center": "Inferior central",
+			"bottom-right": "Inferior direito"
+		}
 	},
 	"language": {
 		"title": "Idioma"

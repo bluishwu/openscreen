@@ -112,6 +112,11 @@ interface FrameRenderConfig {
 	showKeyboardOverlay?: boolean;
 	showSingleKeyPresses?: boolean;
 	keyboardOverlaySize?: number;
+	keyboardOverlayStyle?: import("@/lib/keyboardEvents").KeyboardOverlayStyle;
+	keyboardOverlayPosition?: import("@/lib/keyboardEvents").KeyboardOverlayPosition;
+	keyboardOverlayOpacity?: number;
+	keyboardOverlayOffset?: number;
+	disabledKeyboardEventIds?: string[];
 }
 
 interface AnimationState {
@@ -535,6 +540,11 @@ export class FrameRenderer {
 				timeMs,
 				showSingleKeys: this.config.showSingleKeyPresses ?? false,
 				size: this.config.keyboardOverlaySize ?? 1,
+				style: this.config.keyboardOverlayStyle ?? "glass",
+				position: this.config.keyboardOverlayPosition ?? "bottom-center",
+				backgroundOpacity: this.config.keyboardOverlayOpacity ?? 0.86,
+				offset: this.config.keyboardOverlayOffset ?? 0.055,
+				disabledEventIds: this.config.disabledKeyboardEventIds ?? [],
 				platform: this.config.platform,
 				width: this.config.width,
 				height: this.config.height,

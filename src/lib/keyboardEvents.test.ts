@@ -4,6 +4,7 @@ import {
 	keyboardCodeFromMacKeyCode,
 	keyboardCodeFromWindowsVirtualKey,
 	keyboardEventLabels,
+	keyboardRecordingEventId,
 	normalizeKeyboardRecordingEvent,
 } from "./keyboardEvents";
 
@@ -50,5 +51,10 @@ describe("keyboard overlay selection", () => {
 		const event = { timeMs: 0, code: "KeyK", modifiers: ["control", "meta"] as const };
 		expect(keyboardEventLabels(event, "darwin")).toEqual(["⌃", "⌘", "K"]);
 		expect(keyboardEventLabels(event, "win32")).toEqual(["Ctrl", "Win", "K"]);
+	});
+
+	it("skips events disabled from the keyboard timeline", () => {
+		const disabledId = keyboardRecordingEventId(events[1], 1);
+		expect(getActiveKeyboardOverlay(events, 700, false, [disabledId])).toBeNull();
 	});
 });

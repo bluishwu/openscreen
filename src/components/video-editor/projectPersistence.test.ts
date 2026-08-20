@@ -81,15 +81,30 @@ describe("projectPersistence media compatibility", () => {
 		expect(defaults.showKeyboardOverlay).toBe(true);
 		expect(defaults.showSingleKeyPresses).toBe(false);
 		expect(defaults.keyboardOverlaySize).toBe(1);
+		expect(defaults.keyboardOverlayStyle).toBe("glass");
+		expect(defaults.keyboardOverlayPosition).toBe("bottom-center");
+		expect(defaults.keyboardOverlayOpacity).toBe(0.86);
+		expect(defaults.keyboardOverlayOffset).toBe(0.055);
+		expect(defaults.disabledKeyboardEventIds).toEqual([]);
 
 		const customized = normalizeProjectEditor({
 			showKeyboardOverlay: false,
 			showSingleKeyPresses: true,
 			keyboardOverlaySize: 99,
+			keyboardOverlayStyle: "light",
+			keyboardOverlayPosition: "top-right",
+			keyboardOverlayOpacity: -1,
+			keyboardOverlayOffset: 99,
+			disabledKeyboardEventIds: ["event-1", "event-1", 42 as never],
 		});
 		expect(customized.showKeyboardOverlay).toBe(false);
 		expect(customized.showSingleKeyPresses).toBe(true);
 		expect(customized.keyboardOverlaySize).toBe(1.6);
+		expect(customized.keyboardOverlayStyle).toBe("light");
+		expect(customized.keyboardOverlayPosition).toBe("top-right");
+		expect(customized.keyboardOverlayOpacity).toBe(0.25);
+		expect(customized.keyboardOverlayOffset).toBe(0.2);
+		expect(customized.disabledKeyboardEventIds).toEqual(["event-1"]);
 	});
 
 	it("normalizes blur region type and mosaic block size safely", () => {
