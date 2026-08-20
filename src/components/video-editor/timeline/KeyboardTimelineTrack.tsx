@@ -1,6 +1,6 @@
 import type { Span } from "dnd-timeline";
 import { useItem, useTimelineContext } from "dnd-timeline";
-import { Eye, EyeOff, Keyboard, Pencil } from "lucide-react";
+import { Eye, EyeOff, Keyboard, Pencil, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ interface KeyboardTimelineTrackProps {
 	rowId: string;
 	onToggleEvent?: (eventId: string) => void;
 	onEditEvent?: (eventId: string, displayText: string) => void;
+	onDeleteEvent?: (eventId: string) => void;
 }
 
 interface KeyboardTimelineItemProps {
@@ -39,6 +40,7 @@ interface KeyboardTimelineItemProps {
 	isDisabled: boolean;
 	onToggle?: () => void;
 	onEdit?: () => void;
+	onDelete?: () => void;
 }
 
 function KeyboardTimelineItem({
@@ -50,6 +52,7 @@ function KeyboardTimelineItem({
 	isDisabled,
 	onToggle,
 	onEdit,
+	onDelete,
 }: KeyboardTimelineItemProps) {
 	const t = useScopedT("timeline");
 	const { setNodeRef, attributes, listeners, itemStyle, itemContentStyle } = useItem({
@@ -93,6 +96,18 @@ function KeyboardTimelineItem({
 					<Pencil className="h-2.5 w-2.5 shrink-0 opacity-0 group-hover:opacity-60" />
 					<button
 						type="button"
+						className="relative z-30 flex h-5 w-5 shrink-0 items-center justify-center rounded text-red-200/70 hover:bg-red-500/15 hover:text-red-100"
+						title={t("keyboard.delete")}
+						onPointerDown={(event) => event.stopPropagation()}
+						onClick={(event) => {
+							event.stopPropagation();
+							onDelete?.();
+						}}
+					>
+						<Trash2 className="h-3 w-3" />
+					</button>
+					<button
+						type="button"
 						className="relative z-30 flex h-5 w-5 shrink-0 items-center justify-center rounded hover:bg-white/10"
 						title={isDisabled ? t("keyboard.enable") : t("keyboard.disable")}
 						onPointerDown={(event) => event.stopPropagation()}
@@ -116,6 +131,7 @@ export default function KeyboardTimelineTrack({
 	rowId,
 	onToggleEvent,
 	onEditEvent,
+	onDeleteEvent,
 }: KeyboardTimelineTrackProps) {
 	const t = useScopedT("timeline");
 	const { range } = useTimelineContext();
@@ -163,6 +179,7 @@ export default function KeyboardTimelineTrack({
 						isDisabled={disabled.has(item.id)}
 						onToggle={() => onToggleEvent?.(item.id)}
 						onEdit={() => beginEdit(item.id, item.label)}
+						onDelete={() => onDeleteEvent?.(item.id)}
 					/>
 				))}
 			</div>
@@ -182,6 +199,19 @@ export default function KeyboardTimelineTrack({
 						placeholder={t("keyboard.editPlaceholder")}
 					/>
 					<DialogFooter>
+						{editingId && onDeleteEvent && (
+							<Button
+								variant="destructive"
+								className="sm:mr-auto"
+								onClick={() => {
+									onDeleteEvent(editingId);
+									setEditingId(null);
+								}}
+							>
+								<Trash2 className="mr-1.5 h-3.5 w-3.5" />
+								{t("keyboard.delete")}
+							</Button>
+						)}
 						<Button variant="outline" onClick={() => setEditingId(null)}>
 							{t("keyboard.cancel")}
 						</Button>

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type {
 	KeyboardCombinationStyle,
 	KeyboardOverlayAnimation,
@@ -220,7 +221,6 @@ export function KeyboardOverlay({
 
 	const unit = Math.max(10, Math.min(canvasWidth, canvasHeight) * 0.028 * size);
 	const labels = keyboardEventLabels(active.event, platform);
-	const renderedLabels = combinationStyle === "plus" ? [labels.join(" + ")] : labels;
 	const theme = overlayTheme(style, backgroundOpacity);
 	const minimal = style === "minimal";
 	const motion = getKeyboardOverlayMotion(active, animation);
@@ -250,27 +250,41 @@ export function KeyboardOverlay({
 					transformOrigin: position.startsWith("top") ? "top center" : "bottom center",
 				}}
 			>
-				{renderedLabels.map((label, index) => (
-					<div
-						key={`${label}-${index}`}
-						className="flex items-center justify-center font-semibold"
-						style={{
-							minWidth: unit * 1.55,
-							height: unit * 1.55,
-							padding: `0 ${unit * 0.42}px`,
-							borderRadius: unit * theme.keyRadius,
-							fontSize: unit * 0.78,
-							fontFamily: theme.fontFamily,
-							letterSpacing: theme.letterSpacing,
-							lineHeight: 1,
-							color: theme.text,
-							background: theme.key,
-							border: `1px solid ${theme.keyBorder}`,
-							boxShadow: theme.keyShadow,
-						}}
-					>
-						{label}
-					</div>
+				{labels.map((label, index) => (
+					<Fragment key={`${label}-${index}`}>
+						<div
+							className="flex items-center justify-center font-semibold"
+							style={{
+								minWidth: unit * 1.55,
+								height: unit * 1.55,
+								padding: `0 ${unit * 0.42}px`,
+								borderRadius: unit * theme.keyRadius,
+								fontSize: unit * 0.78,
+								fontFamily: theme.fontFamily,
+								letterSpacing: theme.letterSpacing,
+								lineHeight: 1,
+								color: theme.text,
+								background: theme.key,
+								border: `1px solid ${theme.keyBorder}`,
+								boxShadow: theme.keyShadow,
+							}}
+						>
+							{label}
+						</div>
+						{combinationStyle === "plus" && index < labels.length - 1 && (
+							<span
+								className="font-semibold"
+								style={{
+									color: theme.text,
+									fontFamily: theme.fontFamily,
+									fontSize: unit * 0.72,
+									lineHeight: 1,
+								}}
+							>
+								+
+							</span>
+						)}
+					</Fragment>
 				))}
 			</div>
 		</div>

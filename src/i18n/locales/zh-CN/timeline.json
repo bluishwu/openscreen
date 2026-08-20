@@ -21,6 +21,7 @@
 		"resizeEnd": "拖动以调整结束时间",
 		"enable": "显示这个按键",
 		"disable": "隐藏这个按键",
+		"delete": "删除这个按键",
 		"editTitle": "编辑按键内容",
 		"editDescription": "输入视频中显示的文字；留空保存可恢复为录制到的按键名称。",
 		"editPlaceholder": "例如：Ctrl + K",

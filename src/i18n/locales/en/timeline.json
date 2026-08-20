@@ -25,6 +25,7 @@
 		"resizeEnd": "Drag to change the end",
 		"enable": "Show this key press",
 		"disable": "Hide this key press",
+		"delete": "Delete this key press",
 		"editTitle": "Edit key press",
 		"editDescription": "Enter the text shown in the video. Leave it blank to restore the captured key labels.",
 		"editPlaceholder": "For example: Ctrl + K",

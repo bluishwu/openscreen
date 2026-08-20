@@ -335,6 +335,25 @@ export default function VideoEditor() {
 		},
 		[pushState, cursorRecordingData],
 	);
+
+	const handleKeyboardDelete = useCallback(
+		(eventId: string) => {
+			pushState((previous) => {
+				const editableEvents = withStableKeyboardEventIds(
+					previous.keyboardEventsOverride ?? cursorRecordingData?.keyboardEvents ?? [],
+				);
+				return {
+					keyboardEventsOverride: editableEvents.filter(
+						(event, index) => keyboardRecordingEventId(event, index) !== eventId,
+					),
+					disabledKeyboardEventIds: previous.disabledKeyboardEventIds.filter(
+						(id) => id !== eventId,
+					),
+				};
+			});
+		},
+		[pushState, cursorRecordingData],
+	);
 	const cursorClickTimestamps = useMemo<number[]>(() => {
 		const recordingClicks =
 			cursorRecordingData?.samples
@@ -3147,6 +3166,7 @@ export default function VideoEditor() {
 									disabledKeyboardEventIds={disabledKeyboardEventIds}
 									onKeyboardSpanChange={handleKeyboardSpanChange}
 									onKeyboardEdit={handleKeyboardEdit}
+									onKeyboardDelete={handleKeyboardDelete}
 									platform={nativePlatform ?? "linux"}
 									onToggleKeyboardEvent={(eventId) =>
 										pushState((previous) => ({

@@ -99,6 +99,7 @@ interface TimelineEditorProps {
 	onToggleKeyboardEvent?: (eventId: string) => void;
 	onKeyboardSpanChange?: (eventId: string, span: Span) => void;
 	onKeyboardEdit?: (eventId: string, displayText: string) => void;
+	onKeyboardDelete?: (eventId: string) => void;
 	platform?: string;
 	/** Opens the auto-captions flow. When omitted, the captions button is hidden. */
 	onGenerateCaptions?: () => void;
@@ -585,6 +586,7 @@ function Timeline({
 	disabledKeyboardEventIds = [],
 	onToggleKeyboardEvent,
 	onKeyboardEdit,
+	onKeyboardDelete,
 	platform = "linux",
 }: {
 	items: TimelineRenderItem[];
@@ -609,6 +611,7 @@ function Timeline({
 	disabledKeyboardEventIds?: string[];
 	onToggleKeyboardEvent?: (eventId: string) => void;
 	onKeyboardEdit?: (eventId: string, displayText: string) => void;
+	onKeyboardDelete?: (eventId: string) => void;
 	platform?: string;
 }) {
 	const t = useScopedT("timeline");
@@ -822,6 +825,7 @@ function Timeline({
 					rowId={KEYBOARD_ROW_ID}
 					onToggleEvent={onToggleKeyboardEvent}
 					onEditEvent={onKeyboardEdit}
+					onDeleteEvent={onKeyboardDelete}
 				/>
 			</Row>
 
@@ -961,6 +965,7 @@ export default function TimelineEditor({
 	onToggleKeyboardEvent,
 	onKeyboardSpanChange,
 	onKeyboardEdit,
+	onKeyboardDelete,
 	platform = "linux",
 	onGenerateCaptions,
 	isGeneratingCaptions = false,
@@ -1707,6 +1712,7 @@ export default function TimelineEditor({
 						disabledKeyboardEventIds={disabledKeyboardEventIds}
 						onToggleKeyboardEvent={onToggleKeyboardEvent}
 						onKeyboardEdit={onKeyboardEdit}
+						onKeyboardDelete={onKeyboardDelete}
 						platform={platform}
 					/>
 				</TimelineWrapper>
